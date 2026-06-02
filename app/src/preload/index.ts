@@ -8,6 +8,10 @@ const api = {
     { hash: string; subject: string; when: string; current: boolean }[]
   >,
   reveal: (p: string) => ipcRenderer.invoke('shell:reveal', p),
+  theme: {
+    set: (mode: 'light' | 'dark' | 'system') => ipcRenderer.invoke('theme:set', mode) as Promise<boolean>,
+    get: () => ipcRenderer.invoke('theme:get') as Promise<boolean>
+  },
   pty: {
     start: (opts: { cols?: number; rows?: number }) => ipcRenderer.invoke('pty:start', opts) as Promise<boolean>,
     write: (d: string) => ipcRenderer.send('pty:write', d),

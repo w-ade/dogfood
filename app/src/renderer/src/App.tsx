@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Terminal from './Terminal'
 import cowboy from './assets/cowboy.svg'
+import cowboyInverse from './assets/cowboy-inverse.svg'
 
 type Project = { path: string; name: string }
 type Activity = { hash: string; subject: string; when: string; current: boolean }
@@ -14,6 +15,8 @@ const I = {
   terminal: <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
   panel: <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" strokeWidth="2"/><path d="M3 14.5h18" stroke="currentColor" strokeWidth="2"/></svg>,
   chevDown: <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  sun: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
+  moon: <svg viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>,
   file: <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/><path d="M13 3v5h5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>,
   commit: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2"/><path d="M2 12h6M16 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
   close: <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
@@ -30,6 +33,7 @@ export default function App(): JSX.Element {
   const [activity, setActivity] = useState<Activity[]>([])
   const [terminalOpen, setTerminalOpen] = useState(false)
   const [bg, setBg] = useState<'grid' | 'plain' | 'dark'>('grid')
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [zoom, setZoom] = useState(100)
   const [drawerH, setDrawerH] = useState(300)
   const [isResizing, setIsResizing] = useState(false)
@@ -63,6 +67,23 @@ export default function App(): JSX.Element {
   useEffect(() => {
     window.dogfood.currentProject().then(setProject)
   }, [])
+
+  // theme — persisted, follows system on first run; drives macOS vibrancy tint
+  const applyTheme = useCallback((m: 'light' | 'dark') => {
+    setTheme(m)
+    document.documentElement.dataset.theme = m
+    window.dogfood.theme.set(m)
+  }, [])
+  useEffect(() => {
+    const saved = localStorage.getItem('dogfood-theme') as 'light' | 'dark' | null
+    if (saved) applyTheme(saved)
+    else window.dogfood.theme.get().then((dark) => applyTheme(dark ? 'dark' : 'light'))
+  }, [applyTheme])
+  const toggleTheme = (): void => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    localStorage.setItem('dogfood-theme', next)
+    applyTheme(next)
+  }
 
   const refreshActivity = useCallback(() => {
     window.dogfood.activity().then(setActivity)
@@ -99,7 +120,7 @@ export default function App(): JSX.Element {
     <div className="app">
       {/* ---------- top bar ---------- */}
       <div className="topbar">
-        <div className="brand"><img className="mark" src={cowboy} alt="Cowboy" />dogfood</div>
+        <div className="brand"><img className="mark" src={theme === 'dark' ? cowboyInverse : cowboy} alt="Cowboy" />dogfood</div>
 
         <button className={`focus ${focus ? '' : 'empty'}`} onClick={openPalette}>
           {focus ? base(focus) : 'Pick a component'}
@@ -113,6 +134,7 @@ export default function App(): JSX.Element {
             onClick={() => setActivityOpen((v) => { const n = !v; if (n) refreshActivity(); return n })}>{I.activity}</button>
           <button className={`iconbtn ${terminalOpen ? 'on' : ''}`} title="Terminal (⌘J)"
             onClick={() => setTerminalOpen((v) => !v)}>{I.panel}</button>
+          <button className="iconbtn" title="Toggle light / dark" onClick={toggleTheme}>{theme === 'dark' ? I.sun : I.moon}</button>
         </div>
       </div>
 
@@ -190,7 +212,7 @@ export default function App(): JSX.Element {
           <button className="iconbtn sm" title="Hide terminal (⌘J)" onClick={() => setTerminalOpen(false)}>{I.chevDown}</button>
         </div>
         {termEverOpened.current && (
-          <div className="shelf-term"><Terminal projectKey={project?.path || 'home'} /></div>
+          <div className="shelf-term"><Terminal projectKey={project?.path || 'home'} theme={theme} /></div>
         )}
       </div>
 

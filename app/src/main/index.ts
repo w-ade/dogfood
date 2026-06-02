@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell, nativeImage } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, shell, nativeImage, nativeTheme } from 'electron'
 import { join, basename } from 'path'
 import { readdirSync, readFileSync, writeFileSync } from 'fs'
 import { execSync } from 'child_process'
@@ -42,7 +42,9 @@ function createWindow(): void {
     show: false,
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 18, y: 22 },
-    backgroundColor: '#f5f5f7',
+    backgroundColor: '#00000000',
+    vibrancy: 'under-window',
+    visualEffectState: 'active',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -193,3 +195,14 @@ ipcMain.on('pty:resize', (_e, { cols, rows }: { cols: number; rows: number }) =>
 ipcMain.handle('shell:reveal', (_e, p: string) => {
   shell.showItemInFolder(p)
 })
+
+/* ------------------------------------------------------------------ */
+/* Theme — drives macOS vibrancy tint (light frost vs dark frost)      */
+/* ------------------------------------------------------------------ */
+
+ipcMain.handle('theme:set', (_e, mode: 'light' | 'dark' | 'system') => {
+  nativeTheme.themeSource = mode
+  return nativeTheme.shouldUseDarkColors
+})
+
+ipcMain.handle('theme:get', () => nativeTheme.shouldUseDarkColors)

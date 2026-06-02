@@ -5,6 +5,10 @@ interface Window {
     listComponents: () => Promise<string[]>
     activity: () => Promise<{ hash: string; subject: string; when: string; current: boolean }[]>
     reveal: (p: string) => Promise<void>
+    theme: {
+      set: (mode: 'light' | 'dark' | 'system') => Promise<boolean>
+      get: () => Promise<boolean>
+    }
     pty: {
       start: (opts: { cols?: number; rows?: number }) => Promise<boolean>
       write: (d: string) => void
