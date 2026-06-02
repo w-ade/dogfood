@@ -53,6 +53,12 @@ export default function CursorClone(): JSX.Element {
 
   const [panelW, setPanelW] = useState(420)
   const [collapsed, setCollapsed] = useState(false)
+  const [termSeq, setTermSeq] = useState(0) // bump to kill + respawn the terminal
+  const [confirmKill, setConfirmKill] = useState(false)
+  const killTerminal = (): void => {
+    setTermSeq((n) => n + 1)
+    setConfirmKill(false)
+  }
   const resizing = useRef(false)
   const startResize = (e: React.MouseEvent): void => {
     e.preventDefault()
@@ -114,12 +120,26 @@ export default function CursorClone(): JSX.Element {
               ))}
             </div>
             <div className="cc-panel-ctrls">
+              <button className="cc-ic cc-kill" title="Kill terminal" onClick={() => setConfirmKill(true)}>{Trash}</button>
               <button className="cc-ic cc-toggle" title="Hide terminal" onClick={() => setCollapsed(true)}>{ChevDown}</button>
             </div>
           </div>
           <div className="cc-term">
-            <Terminal id="main" theme={theme} />
+            <Terminal key={termSeq} id="main" theme={theme} />
           </div>
+
+          {confirmKill && (
+            <div className="cc-confirm-scrim" onMouseDown={() => setConfirmKill(false)}>
+              <div className="cc-confirm" onMouseDown={(e) => e.stopPropagation()}>
+                <div className="cc-confirm-title">Kill terminal?</div>
+                <div className="cc-confirm-sub">Are you sure you want to kill the current terminal? The running session will be ended and a fresh one started.</div>
+                <div className="cc-confirm-row">
+                  <button className="cc-btn" onClick={() => setConfirmKill(false)}>Cancel</button>
+                  <button className="cc-btn danger" onClick={killTerminal}>Kill terminal</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -411,12 +411,28 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; col
 .cc-panel { flex:none; min-height:0; display:flex; flex-direction:column; border-left:1px solid var(--edge); position:relative; }
 .cc-panel-resize { position:absolute; left:-3px; top:0; bottom:0; width:7px; cursor:ew-resize; z-index:6; }
 .cc-panel-resize:hover { background:var(--edge); }
-.cc-panel-head { height:44px; flex:none; display:flex; align-items:center; padding:0 12px; }
-.cc-tabs { display:flex; align-items:center; gap:20px; font-size:14px; }
-.cc-tab { color:var(--mut); }
-.cc-tab.on { color:var(--fg); background:var(--tab-active); padding:5px 11px; border-radius:6px; }
-.cc-panel-ctrls { margin-left:auto; display:flex; align-items:center; gap:14px; color:var(--mut); font-size:13px; }
-.cc-panel-ctrls .cc-ic svg { width:16px; height:16px; }
+.cc-panel-head { height:36px; flex:none; display:flex; align-items:center; padding:0 10px 0 14px; border-bottom:1px solid var(--edge); }
+/* flat text tabs, matching Cursor's terminal panel header */
+.cc-tabs { display:flex; align-items:center; gap:16px; font-size:12px; }
+.cc-tab { color:var(--mut); position:relative; padding:8px 0; }
+.cc-tab.on { color:var(--fg); }
+.cc-tab.on::after { content:''; position:absolute; left:0; right:0; bottom:0; height:1.5px; background:var(--fg); border-radius:2px; }
+.cc-panel-ctrls { margin-left:auto; display:flex; align-items:center; gap:12px; color:var(--mut); font-size:13px; }
+.cc-panel-ctrls .cc-ic { cursor:pointer; }
+.cc-panel-ctrls .cc-ic svg { width:15px; height:15px; }
+.cc-panel-ctrls .cc-toggle:hover { color:var(--fg); }
+.cc-kill:hover { color:#ff453a; }
+
+/* kill-terminal confirmation */
+.cc-confirm-scrim { position:fixed; inset:0; z-index:30; display:grid; place-items:center; background:rgba(0,0,0,.32); -webkit-app-region:no-drag; }
+.cc-confirm { width:300px; background:var(--bar); border:1px solid var(--edge); border-radius:12px; padding:18px; box-shadow:0 20px 60px rgba(0,0,0,.45); }
+.cc-confirm-title { font-size:13.5px; font-weight:600; color:var(--fg); margin-bottom:6px; }
+.cc-confirm-sub { font-size:12px; line-height:1.5; color:var(--mut); margin-bottom:16px; }
+.cc-confirm-row { display:flex; justify-content:flex-end; gap:8px; }
+.cc-btn { font-size:12.5px; padding:6px 13px; border-radius:8px; border:1px solid var(--chipbd); background:var(--chip); color:var(--fg); cursor:pointer; }
+.cc-btn:hover { border-color:var(--mut); }
+.cc-btn.danger { background:#ff453a; border-color:#ff453a; color:#fff; }
+.cc-btn.danger:hover { background:#ff2d20; border-color:#ff2d20; }
 .cc-agent { display:flex; align-items:center; gap:7px; }
 .cc-inf { font-size:16px; }
 .cc-plus { display:flex; align-items:center; gap:1px; }
