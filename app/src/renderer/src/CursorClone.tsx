@@ -40,18 +40,18 @@ export default function CursorClone(): JSX.Element {
       return n
     })
 
-  const [panelH, setPanelH] = useState(280)
+  const [panelW, setPanelW] = useState(420)
   const [collapsed, setCollapsed] = useState(false)
   const resizing = useRef(false)
   const startResize = (e: React.MouseEvent): void => {
     e.preventDefault()
     resizing.current = true
-    const sy = e.clientY
-    const sh = panelH
-    document.body.style.cursor = 'ns-resize'
+    const sx = e.clientX
+    const sw = panelW
+    document.body.style.cursor = 'ew-resize'
     const onMove = (ev: MouseEvent): void => {
       if (!resizing.current) return
-      setPanelH(Math.min(Math.max(120, sh + (sy - ev.clientY)), window.innerHeight - 160))
+      setPanelW(Math.min(Math.max(280, sw + (sx - ev.clientX)), window.innerWidth - 300))
     }
     const onUp = (): void => {
       resizing.current = false
@@ -69,51 +69,50 @@ export default function CursorClone(): JSX.Element {
       <div className="cc-titlebar">
         <div className="cc-title">Dogfood</div>
         <div className="cc-titleright">
+          <button className={`cc-ic cc-toggle ${collapsed ? '' : 'on'}`} title="Terminal panel" onClick={() => setCollapsed((c) => !c)}>{PanelRight}</button>
           <button className="cc-ic cc-gear" title="Toggle light / dark" onClick={toggle}>{theme === 'dark' ? Sun : Moon}</button>
           <span className="cc-ic" title="Settings">{Gear}</span>
         </div>
       </div>
 
-      {/* editor / welcome */}
-      <div className="cc-editor">
-        <div className="cc-welcome">
-          <img className="cc-logo" src={theme === 'dark' ? cowboyLight : cowboyDark} alt="" />
-          <div className="cc-shortcuts">
-            {shortcuts.map(([label, keys]) => (
-              <div className="cc-sc" key={label}>
-                <span className="cc-sc-label">{label}</span>
-                <span className="cc-sc-keys">
-                  {keys.map((k, i) => <span className="cc-key" key={i}>{k}</span>)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* bottom panel */}
-      <div className="cc-panel" style={{ height: collapsed ? undefined : panelH }}>
-        {!collapsed && <div className="cc-panel-resize" onMouseDown={startResize} />}
-        <div className="cc-panel-head">
-          <div className="cc-tabs">
-            {tabs.map((t) => (
-              <span key={t} className={`cc-tab ${t === 'Terminal' ? 'on' : ''}`}>{t}</span>
-            ))}
-          </div>
-          <div className="cc-panel-ctrls">
-            <button className="cc-ic cc-toggle" title={collapsed ? 'Show terminal' : 'Hide terminal'} onClick={() => setCollapsed((c) => !c)}>
-              {collapsed ? ChevUp : ChevDown}
-            </button>
+      {/* body: canvas + right terminal panel */}
+      <div className="cc-main">
+        <div className="cc-editor">
+          <div className="cc-welcome">
+            <img className="cc-logo" src={theme === 'dark' ? cowboyLight : cowboyDark} alt="" />
+            <div className="cc-shortcuts">
+              {shortcuts.map(([label, keys]) => (
+                <div className="cc-sc" key={label}>
+                  <span className="cc-sc-label">{label}</span>
+                  <span className="cc-sc-keys">
+                    {keys.map((k, i) => <span className="cc-key" key={i}>{k}</span>)}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         {!collapsed && (
-          <div className="cc-term">
-            <div className="cc-term-line">
-              <span className="cc-dot" />
-              <span><span className="cc-prompt">$</span> npx tsc --noEmit 2&gt;&amp;1</span>
+          <div className="cc-panel" style={{ width: panelW }}>
+            <div className="cc-panel-resize" onMouseDown={startResize} />
+            <div className="cc-panel-head">
+              <div className="cc-tabs">
+                {tabs.map((t) => (
+                  <span key={t} className={`cc-tab ${t === 'Terminal' ? 'on' : ''}`}>{t}</span>
+                ))}
+              </div>
+              <div className="cc-panel-ctrls">
+                <button className="cc-ic cc-toggle" title="Hide terminal" onClick={() => setCollapsed(true)}>{ChevDown}</button>
+              </div>
             </div>
-            <div className="cc-cursor" />
+            <div className="cc-term">
+              <div className="cc-term-line">
+                <span className="cc-dot" />
+                <span><span className="cc-prompt">$</span> npx tsc --noEmit 2&gt;&amp;1</span>
+              </div>
+              <div className="cc-cursor" />
+            </div>
           </div>
         )}
       </div>
