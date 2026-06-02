@@ -34,9 +34,12 @@ export default function Terminal({
   useEffect(() => {
     if (!hostRef.current) return
     const term = new Xterm({
-      fontFamily: 'var(--mono), Menlo, monospace',
-      fontSize: 12.5,
-      lineHeight: 1.35,
+      fontFamily: '"Geist Mono", ui-monospace, Menlo, monospace',
+      fontSize: 13,
+      fontWeight: 400,
+      fontWeightBold: 600,
+      lineHeight: 1.2,
+      letterSpacing: 0,
       cursorBlink: true,
       allowProposedApi: true,
       allowTransparency: true,
@@ -71,6 +74,15 @@ export default function Terminal({
     const ro = new ResizeObserver(onResize)
     ro.observe(hostRef.current)
     window.addEventListener('resize', onResize)
+
+    // remeasure once Geist Mono actually loads (canvas font metrics)
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(() => {
+        if (disposed) return
+        safeFit()
+        api.pty.resize(term.cols, term.rows)
+      })
+    }
 
     term.focus()
 
