@@ -106,6 +106,10 @@
   .chip{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--soft);background:var(--chip);border:0;padding:6px 12px;border-radius:999px;cursor:pointer}
   .chip:hover{color:var(--ink)}
   .chip.on{background:var(--ink);color:#fff}
+  .cselects{display:flex;gap:8px}
+  .sel{position:relative}
+  .sel select{appearance:none;-webkit-appearance:none;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--chip);border:0;border-radius:999px;padding:7px 30px 7px 14px;cursor:pointer}
+  .sel::after{content:"";position:absolute;right:13px;top:50%;width:6px;height:6px;border-right:1.6px solid var(--label);border-bottom:1.6px solid var(--label);transform:translateY(-70%) rotate(45deg);pointer-events:none}
   .ccount{font-size:12px;color:var(--faint);margin-bottom:14px}
   .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
   .ccard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
@@ -191,14 +195,11 @@
 
       <div class="cbar">
         <label class="csearch"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="csearch" placeholder="Search components…" /></label>
-        <div class="chips" id="cstatus">
-          <button class="chip on" data-s="all">All</button>
-          <button class="chip" data-s="Built">Built</button>
-          <button class="chip" data-s="Planned">Planned</button>
-          <button class="chip" data-s="Future">Future</button>
+        <div class="cselects">
+          <div class="sel"><select id="cstatus-sel"><option value="all">All status</option><option value="Built">Built</option><option value="Planned">Planned</option><option value="Future">Future</option></select></div>
+          <div class="sel"><select id="carea-sel"></select></div>
         </div>
       </div>
-      <div class="chips areas" id="careas"></div>
       <div class="ccount" id="ccount"></div>
       <div class="cgrid" id="cgrid"></div>
     </div>
@@ -330,19 +331,21 @@
     {n:'Tooltip',area:'Design system',status:'Planned',d:'Hover hint.'},
     {n:'Toast',area:'Design system',status:'Future',d:'Transient notifications.'}
   ]
-  const careas = document.getElementById('careas')
-  if (careas) {
+  const areaSel = document.getElementById('carea-sel')
+  if (areaSel) {
     const areas = [...new Set(COMPONENTS.map((c) => c.area))]
-    careas.innerHTML = '<button class="chip on" data-a="all">All areas</button>' + areas.map((a) => `<button class="chip" data-a="${a}">${a}</button>`).join('')
-    let fS = 'all', fA = 'all', q = ''
+    areaSel.innerHTML = '<option value="all">All areas</option>' + areas.map((a) => `<option value="${a}">${a}</option>`).join('')
+    const statusSel = document.getElementById('cstatus-sel')
+    let q = ''
     const render = () => {
+      const fS = statusSel.value, fA = areaSel.value
       const items = COMPONENTS.filter((c) => (fS === 'all' || c.status === fS) && (fA === 'all' || c.area === fA) && (!q || (c.n + ' ' + c.d + ' ' + c.area).toLowerCase().includes(q)))
       document.getElementById('cgrid').innerHTML = items.map((c) => `<div class="ccard"><div class="ch"><span class="cn"><span class="dot" style="background:${AREA_C[c.area] || '#aaa'}"></span>${c.n}</span><span class="ctag ${c.status}">${c.status}</span></div><div class="cd">${c.d}</div><div class="cmeta">${c.area}</div></div>`).join('') || '<p style="color:var(--faint)">No components match.</p>'
       const built = COMPONENTS.filter((c) => c.status === 'Built').length
       document.getElementById('ccount').textContent = `${items.length} of ${COMPONENTS.length} shown · ${built} built`
     }
-    document.getElementById('cstatus').addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (!b) return; fS = b.dataset.s; [...e.currentTarget.children].forEach((x) => x.classList.toggle('on', x === b)); render() })
-    careas.addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (!b) return; fA = b.dataset.a; [...careas.children].forEach((x) => x.classList.toggle('on', x === b)); render() })
+    statusSel.addEventListener('change', render)
+    areaSel.addEventListener('change', render)
     document.getElementById('csearch').addEventListener('input', (e) => { q = e.target.value.toLowerCase().trim(); render() })
     render()
   }
