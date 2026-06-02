@@ -323,3 +323,29 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; col
 .corner .cbtn:hover { background: var(--card); color: var(--ink); }
 .corner .cbtn.on { background: var(--card); color: var(--ink); }
 .corner .cbtn svg { width: 17px; height: 17px; }
+
+/* ---------------- tab bar (Cursor-style, glassy) ---------------- */
+.tabbar {
+  height: 38px; flex: none; display: flex; align-items: center; gap: 6px;
+  padding: 0 8px; background: var(--chrome);
+  border-bottom: 1px solid var(--hairline);
+  -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+  -webkit-app-region: no-drag;
+}
+.etabs { flex: 1; min-width: 0; display: flex; align-items: center; gap: 2px; overflow-x: auto; }
+.etabs::-webkit-scrollbar { height: 0; }
+.etab {
+  display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 6px 0 12px;
+  border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--gray);
+  cursor: pointer; max-width: 200px; flex: none; border: 1px solid transparent;
+}
+.etab:hover { background: var(--card); color: var(--ink); }
+.etab.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm); border-color: var(--hairline); }
+.etab-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.etab-x { width: 18px; height: 18px; border-radius: 5px; display: grid; place-items: center; color: var(--gray2); flex: none; opacity: 0; transition: opacity .12s; }
+.etab:hover .etab-x, .etab.on .etab-x { opacity: 1; }
+.etab-x:hover { background: var(--card); color: var(--ink); }
+.etab-x svg { width: 12px; height: 12px; }
+.etab-add, .etab-more { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; color: var(--gray); flex: none; }
+.etab-add:hover, .etab-more:hover { background: var(--card); color: var(--ink); }
+.etab-add svg, .etab-more svg { width: 15px; height: 15px; }

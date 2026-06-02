@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import DialPanel from './DialPanel'
-import TestComponent from './TestComponent'
 
 type Project = { path: string; name: string }
 type Activity = { hash: string; subject: string; when: string; current: boolean }
@@ -24,13 +23,16 @@ const I = {
   file: <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/><path d="M13 3v5h5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>,
   commit: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2"/><path d="M2 12h6M16 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
   close: <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
+  plus: <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
+  more: <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18" cy="12" r="1.7"/></svg>,
 }
 
 const base = (p: string): string => p.split('/').pop() || p
 
 export default function App(): JSX.Element {
   const [project, setProject] = useState<Project | null>(null)
-  const [focus, setFocus] = useState<string | null>(null)
+  const [tabs, setTabs] = useState<string[]>(['Button.tsx', 'Card.tsx'])
+  const [active, setActive] = useState<string | null>('Button.tsx')
   const [components, setComponents] = useState<string[]>([])
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [activityOpen, setActivityOpen] = useState(false)
@@ -125,7 +127,8 @@ export default function App(): JSX.Element {
     const p = await window.dogfood.openProject()
     if (!p) return
     setProject(p)
-    setFocus(null)
+    setTabs([])
+    setActive(null)
     setComponents([])
     refreshActivity()
   }, [refreshActivity])
@@ -134,6 +137,18 @@ export default function App(): JSX.Element {
     setPaletteOpen(true)
     if (!components.length) setComponents(await window.dogfood.listComponents())
   }, [components.length])
+
+  const openTab = (t: string): void => {
+    setTabs((cur) => (cur.includes(t) ? cur : [...cur, t]))
+    setActive(t)
+  }
+  const closeTab = (t: string): void => {
+    setTabs((cur) => {
+      const next = cur.filter((x) => x !== t)
+      setActive((a) => (a === t ? next[next.length - 1] ?? null : a))
+      return next
+    })
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -169,21 +184,24 @@ export default function App(): JSX.Element {
         </div>
       </div>
 
+      {/* ---------- tab bar (Cursor-style) ---------- */}
+      <div className="tabbar">
+        <div className="etabs">
+          {tabs.map((t) => (
+            <div key={t} className={`etab ${t === active ? 'on' : ''}`} onClick={() => setActive(t)}>
+              <span className="etab-name">{base(t)}</span>
+              <button className="etab-x" title="Close" onClick={(e) => { e.stopPropagation(); closeTab(t) }}>{I.close}</button>
+            </div>
+          ))}
+          <button className="etab-add" title="Open component (⌘P)" onClick={openPalette}>{I.plus}</button>
+        </div>
+        <button className="etab-more" title="More">{I.more}</button>
+      </div>
+
       {/* ---------- body ---------- */}
       <div className="body">
         <div ref={canvasRef} className={`canvas bg-${bg} ${selectMode ? 'selecting' : ''}`}>
           {pointerToast && <div className="select-hint">{I.pointer} Pointer {pointerToast}</div>}
-
-          <div className="artboard" style={{ transform: `scale(${zoom / 100})` }}>
-            <div
-              className="preview-root"
-              onMouseOver={selectMode ? (e) => setHoverBox(boxOf(e.target as Element)) : undefined}
-              onMouseLeave={selectMode ? () => setHoverBox(null) : undefined}
-              onClickCapture={selectMode ? (e) => { e.preventDefault(); e.stopPropagation(); const t = e.target as Element; setSelBox({ ...boxOf(t), label: labelOf(t) }) } : undefined}
-            >
-              <TestComponent />
-            </div>
-          </div>
 
           {selectMode && hoverBox && (
             <div className="pick-outline hover" style={{ left: hoverBox.x, top: hoverBox.y, width: hoverBox.w, height: hoverBox.h }} />
@@ -240,7 +258,7 @@ export default function App(): JSX.Element {
       {paletteOpen && (
         <CommandPalette
           components={components}
-          onPick={(f) => { setFocus(f); setPaletteOpen(false) }}
+          onPick={(f) => { openTab(f); setPaletteOpen(false) }}
           onClose={() => setPaletteOpen(false)}
         />
       )}
