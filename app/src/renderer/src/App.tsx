@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Terminal from './Terminal'
+import FloatingWindow from './FloatingWindow'
 
 type Project = { path: string; name: string }
 type Activity = { hash: string; subject: string; when: string; current: boolean }
@@ -25,13 +26,12 @@ export default function App(): JSX.Element {
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [activityOpen, setActivityOpen] = useState(false)
   const [activity, setActivity] = useState<Activity[]>([])
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [terminalOpen, setTerminalOpen] = useState(false)
   const [bg, setBg] = useState<'grid' | 'plain' | 'dark'>('grid')
   const [zoom, setZoom] = useState(100)
   const termEverOpened = useRef(false)
-  if (drawerOpen) termEverOpened.current = true
+  if (terminalOpen) termEverOpened.current = true
 
-  // initial project (home until one is opened)
   useEffect(() => {
     window.dogfood.currentProject().then(setProject)
   }, [])
@@ -54,13 +54,12 @@ export default function App(): JSX.Element {
     if (!components.length) setComponents(await window.dogfood.listComponents())
   }, [components.length])
 
-  // keyboard shortcuts
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       const meta = e.metaKey || e.ctrlKey
       if (meta && e.key === 'o') { e.preventDefault(); openProject() }
       else if (meta && e.key === 'p') { e.preventDefault(); paletteOpen ? setPaletteOpen(false) : openPalette() }
-      else if (meta && e.key === 'j') { e.preventDefault(); setDrawerOpen((v) => !v) }
+      else if (meta && e.key === 'j') { e.preventDefault(); setTerminalOpen((v) => !v) }
       else if (meta && e.key === 'e') { e.preventDefault(); setActivityOpen((v) => { const n = !v; if (n) refreshActivity(); return n }) }
       else if (e.key === 'Escape') setPaletteOpen(false)
     }
@@ -84,8 +83,8 @@ export default function App(): JSX.Element {
           <button className="iconbtn" title="Find component (⌘P)" onClick={openPalette}>{I.search}</button>
           <button className={`iconbtn ${activityOpen ? 'on' : ''}`} title="Activity (⌘E)"
             onClick={() => setActivityOpen((v) => { const n = !v; if (n) refreshActivity(); return n })}>{I.activity}</button>
-          <button className={`iconbtn ${drawerOpen ? 'on' : ''}`} title="Terminal (⌘J)"
-            onClick={() => setDrawerOpen((v) => !v)}>{I.terminal}</button>
+          <button className={`iconbtn ${terminalOpen ? 'on' : ''}`} title="Terminal (⌘J)"
+            onClick={() => setTerminalOpen((v) => !v)}>{I.terminal}</button>
         </div>
       </div>
 
@@ -112,10 +111,24 @@ export default function App(): JSX.Element {
             </div>
           )}
 
+          {/* floating terminal — lives ON the canvas */}
+          {termEverOpened.current && (
+            <FloatingWindow
+              title="claude — terminal"
+              icon={I.terminal}
+              initial={{ x: 340, y: 190, w: 520, h: 320 }}
+              visible={terminalOpen}
+              z={30}
+              onMinimize={() => setTerminalOpen(false)}
+            >
+              <Terminal projectKey={project?.path || 'home'} />
+            </FloatingWindow>
+          )}
+
           {/* floating controls */}
-          <button className="statuspill" onClick={() => setDrawerOpen((v) => !v)}>
-            <span className={`dot ${drawerOpen ? 'run' : ''}`} />
-            {drawerOpen ? 'Terminal ready' : 'claude'}
+          <button className="statuspill" onClick={() => setTerminalOpen((v) => !v)}>
+            <span className={`dot ${terminalOpen ? 'run' : ''}`} />
+            {terminalOpen ? 'Terminal' : 'claude'}
             <span className="sub">· {project ? project.name : 'no project'}</span>
           </button>
 
@@ -151,20 +164,6 @@ export default function App(): JSX.Element {
                 </div>
               ))}
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* ---------- terminal drawer ---------- */}
-      <div className="drawer" style={{ height: drawerOpen ? 300 : 26 }}>
-        <div className="drawer-handle" onClick={() => setDrawerOpen((v) => !v)}>
-          <span className="lbl"><span className="dot" />{drawerOpen ? 'terminal' : 'claude · terminal'}</span>
-          <span className="grip" />
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 10 }}>⌘J</span>
-        </div>
-        {termEverOpened.current && (
-          <div style={{ flex: 1, minHeight: 0, display: drawerOpen ? 'block' : 'none' }}>
-            <Terminal projectKey={project?.path || 'home'} />
           </div>
         )}
       </div>
