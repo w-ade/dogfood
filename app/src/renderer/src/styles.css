@@ -132,30 +132,28 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; col
 .zoom button:hover { background: var(--card); color: var(--ink); }
 .zoom span { min-width: 42px; text-align: center; }
 
-/* ---------------- floating terminal window (on the canvas) ---------------- */
-.fwin {
-  position: absolute; background: var(--surface);
-  border: 1px solid var(--hairline); border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.12), 0 26px 64px rgba(0,0,0,.16);
-  display: flex; flex-direction: column; overflow: hidden;
+/* ---------------- terminal shelf (Cursor-style bottom panel) ---------------- */
+.shelf {
+  flex: none; overflow: hidden; background: var(--surface);
+  border-top: 1px solid var(--hairline);
+  box-shadow: 0 -8px 24px rgba(0,0,0,.05);
+  display: flex; flex-direction: column;
+  transition: height .26s cubic-bezier(.32, .72, 0, 1);
+  will-change: height;
 }
-.fwin-header {
-  height: 36px; flex: none; display: flex; align-items: center; gap: 8px;
-  padding: 0 8px 0 12px; cursor: grab; user-select: none;
-  background: linear-gradient(var(--surface), var(--page));
-  border-bottom: 1px solid var(--hairline);
+.shelf.resizing { transition: none; }
+.shelf-resize { height: 7px; flex: none; cursor: ns-resize; margin-bottom: -3px; z-index: 2; }
+.shelf-resize:hover { background: var(--blue-bg); }
+.shelf-head {
+  height: 32px; flex: none; display: flex; align-items: center; gap: 8px;
+  padding: 0 8px 0 14px; border-bottom: 1px solid var(--hairline);
+  font-size: 12px; font-weight: 600; color: var(--ink); user-select: none;
 }
-.fwin-header:active { cursor: grabbing; }
-.fwin-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px var(--green-bg); flex: none; }
-.fwin-icon { width: 15px; height: 15px; color: var(--gray); display: grid; place-items: center; }
-.fwin-icon svg { width: 15px; height: 15px; }
-.fwin-title { font-size: 12px; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
-.fwin-min { margin-left: auto; width: 24px; height: 24px; border-radius: 7px; color: var(--gray); display: grid; place-items: center; }
-.fwin-min:hover { background: var(--card); color: var(--ink); }
-.fwin-min svg { width: 15px; height: 15px; }
-.fwin-body { flex: 1; min-height: 0; position: relative; }
-.fwin-resize { position: absolute; right: 2px; bottom: 2px; width: 16px; height: 16px; cursor: nwse-resize; color: var(--gray2); display: grid; place-items: center; }
-.fwin-resize svg { width: 13px; height: 13px; }
+.shelf-title { display: flex; align-items: center; gap: 8px; }
+.shelf-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px var(--green-bg); }
+.shelf-head .iconbtn.sm { margin-left: auto; width: 26px; height: 26px; border-radius: 7px; }
+.shelf-head .iconbtn.sm svg { width: 16px; height: 16px; }
+.shelf-term { flex: 1; min-height: 0; }
 
 .term-wrap { height: 100%; padding: 8px 10px; }
 .term-wrap .xterm { height: 100%; }

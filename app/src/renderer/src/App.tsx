@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Terminal from './Terminal'
-import FloatingWindow from './FloatingWindow'
 import cowboy from './assets/cowboy.svg'
 
 type Project = { path: string; name: string }
@@ -13,6 +12,8 @@ const I = {
   search: <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2"/><path d="M20 20l-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
   activity: <svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2 6 4-14 2 8h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
   terminal: <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  panel: <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" strokeWidth="2"/><path d="M3 14.5h18" stroke="currentColor" strokeWidth="2"/></svg>,
+  chevDown: <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
   file: <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/><path d="M13 3v5h5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>,
   commit: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2"/><path d="M2 12h6M16 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
   close: <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
@@ -30,8 +31,34 @@ export default function App(): JSX.Element {
   const [terminalOpen, setTerminalOpen] = useState(false)
   const [bg, setBg] = useState<'grid' | 'plain' | 'dark'>('grid')
   const [zoom, setZoom] = useState(100)
+  const [drawerH, setDrawerH] = useState(300)
+  const [isResizing, setIsResizing] = useState(false)
+  const resizing = useRef(false)
   const termEverOpened = useRef(false)
   if (terminalOpen) termEverOpened.current = true
+
+  // drag the top edge of the shelf to resize it
+  const startResize = (e: React.MouseEvent): void => {
+    e.preventDefault()
+    resizing.current = true
+    setIsResizing(true)
+    const startY = e.clientY
+    const startH = drawerH
+    document.body.style.cursor = 'ns-resize'
+    const onMove = (ev: MouseEvent): void => {
+      if (!resizing.current) return
+      setDrawerH(Math.min(Math.max(140, startH + (startY - ev.clientY)), window.innerHeight - 150))
+    }
+    const onUp = (): void => {
+      resizing.current = false
+      setIsResizing(false)
+      document.body.style.cursor = ''
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }
 
   useEffect(() => {
     window.dogfood.currentProject().then(setProject)
@@ -85,7 +112,7 @@ export default function App(): JSX.Element {
           <button className={`iconbtn ${activityOpen ? 'on' : ''}`} title="Activity (⌘E)"
             onClick={() => setActivityOpen((v) => { const n = !v; if (n) refreshActivity(); return n })}>{I.activity}</button>
           <button className={`iconbtn ${terminalOpen ? 'on' : ''}`} title="Terminal (⌘J)"
-            onClick={() => setTerminalOpen((v) => !v)}>{I.terminal}</button>
+            onClick={() => setTerminalOpen((v) => !v)}>{I.panel}</button>
         </div>
       </div>
 
@@ -110,20 +137,6 @@ export default function App(): JSX.Element {
                 {project ? 'Pick a component  ⌘P' : 'Open a project  ⌘O'}
               </button>
             </div>
-          )}
-
-          {/* floating terminal — lives ON the canvas */}
-          {termEverOpened.current && (
-            <FloatingWindow
-              title="claude — terminal"
-              icon={I.terminal}
-              initial={{ x: 340, y: 190, w: 520, h: 320 }}
-              visible={terminalOpen}
-              z={30}
-              onMinimize={() => setTerminalOpen(false)}
-            >
-              <Terminal projectKey={project?.path || 'home'} />
-            </FloatingWindow>
           )}
 
           {/* floating controls */}
@@ -166,6 +179,18 @@ export default function App(): JSX.Element {
               ))}
             </div>
           </div>
+        )}
+      </div>
+
+      {/* ---------- terminal shelf (Cursor-style bottom panel) ---------- */}
+      <div className={`shelf ${isResizing ? 'resizing' : ''}`} style={{ height: terminalOpen ? drawerH : 0 }}>
+        <div className="shelf-resize" onMouseDown={startResize} />
+        <div className="shelf-head">
+          <span className="shelf-title"><span className="dot" />claude — terminal</span>
+          <button className="iconbtn sm" title="Hide terminal (⌘J)" onClick={() => setTerminalOpen(false)}>{I.chevDown}</button>
+        </div>
+        {termEverOpened.current && (
+          <div className="shelf-term"><Terminal projectKey={project?.path || 'home'} /></div>
         )}
       </div>
 
