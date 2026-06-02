@@ -6,313 +6,111 @@
 <link rel="icon" type="image/svg+xml" href="cowboy.svg" />
 <title>Dogfood — UI Gallery</title>
 <style>
-  :root{
-    --blue:#007AFF; --blue-bg:#E9F2FF; --green:#34C759; --green-bg:#E6F8EC;
-    --pink:#FF6482; --pink-bg:#FFEEF2; --orange:#FF9500; --orange-bg:#FFF2E1; --red:#FF3B30;
-    --ink:#1C1C1E; --gray:#8E8E93; --gray2:#AEAEB2; --hairline:#E5E5EA;
-    --card:#F2F2F7; --surface:#FFFFFF; --page:#F5F5F7;
-    --r-card:20px; --r-pill:999px; --r-md:14px; --r-sm:10px;
-    --shadow:0 1px 2px rgba(0,0,0,.05),0 10px 30px rgba(0,0,0,.08);
-    --shadow-sm:0 1px 2px rgba(0,0,0,.06);
+  :root{--ink:#272727;--soft:#3a3a3c;--label:#9a9a9a;--faint:#b6b6b6;--line:#ececec;--chip:#f4f4f5;
     --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",sans-serif;
-    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace;
-  }
+    --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--font);color:var(--ink);background:#fff;letter-spacing:-0.01em;-webkit-font-smoothing:antialiased;font-size:14px;padding:0 0 120px}
-  .wrap{max-width:1060px;margin:0 auto;padding:0 28px}
-  header.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--hairline);margin-bottom:8px}
-  header.top .wrap{display:flex;align-items:center;gap:10px;padding:13px 28px}
-  header .brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
-  header .brand img{width:22px;height:22px;border-radius:6px}
-  header .sub{color:var(--gray);font-size:13px}
-  header .tag{margin-left:auto;font-size:12px;font-weight:600;color:var(--gray);text-decoration:none}
-  header .tag:hover{color:var(--ink)}
+  body{font-family:var(--font);color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;letter-spacing:-.011em;font-size:14px;padding:0 0 100px}
+  a{color:inherit;text-decoration:none}
+  .top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+  .top .in{max-width:1040px;margin:0 auto;padding:13px 32px;display:flex;align-items:center;gap:10px}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;letter-spacing:-.02em}
+  .brand img{width:22px;height:22px;border-radius:6px}
+  .top .sub{color:var(--label);font-size:13px}
+  .top .back{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--label)}
+  .top .back:hover{color:var(--ink)}
+  .wrap{max-width:1040px;margin:0 auto;padding:48px 32px}
+  h2{font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--label);margin:42px 0 14px}
+  h2:first-child{margin-top:0}
+  .lbl{font-size:12px;font-weight:600;color:var(--faint);margin:0 0 9px}
+  .row{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
 
-  .sec{padding:34px 0;border-bottom:1px solid var(--hairline)}
-  .sec h2{font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gray);margin-bottom:4px}
-  .sec p.note{font-size:13.5px;color:var(--gray);margin-bottom:18px;max-width:60ch}
-  .row{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
-  .label{font-size:12px;font-weight:600;color:var(--gray2);margin:0 0 9px 2px}
+  /* ---- app frame (recreates the Cursor-style app) ---- */
+  .frame{--b:#1c1c1c;--bar:#1e1e1e;--edge:rgba(255,255,255,.08);--mut:#8c8c8c;--dim:#6a6a6a;--fg:#d6d6d6;--chip2:#2c2c2d;--chipbd:#3a3a3b;
+    width:880px;max-width:100%;height:560px;border-radius:14px;overflow:hidden;border:1px solid var(--edge);
+    background:var(--b);color:var(--fg);display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.16)}
+  .frame.light{--b:#f3f3f3;--bar:#ececec;--edge:#e3e3e3;--mut:#6e6e6e;--dim:#a0a0a0;--fg:#202020;--chip2:#fff;--chipbd:#d6d6d6;border-color:#e3e3e3}
+  .g-title{height:34px;flex:none;display:flex;align-items:center;padding:0 12px 0 16px;border-bottom:1px solid var(--edge);position:relative}
+  .g-lights{display:flex;gap:7px}
+  .g-lights i{width:11px;height:11px;border-radius:50%}
+  .g-lights .r{background:#ff5f57}.g-lights .y{background:#febc2e}.g-lights .g{background:#28c840}
+  .g-tt{position:absolute;left:0;right:0;text-align:center;font-size:12.5px;font-weight:600;color:var(--mut)}
+  .g-tr{margin-left:auto;display:flex;align-items:center;gap:12px;color:var(--mut);z-index:1}
+  .g-tr svg{width:15px;height:15px}
+  .g-canvas{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+  .g-welcome{display:flex;flex-direction:column;align-items:center;gap:16px;transform:translateY(-6px)}
+  .g-logo{width:80px;height:80px;opacity:.13}
+  .g-sc{display:grid;grid-template-columns:max-content max-content;column-gap:16px;row-gap:7px;align-items:center}
+  .g-sl{color:var(--dim);font-size:12.5px;text-align:right}
+  .g-sk{display:flex;gap:5px}
+  .g-key{min-width:20px;height:20px;padding:0 5px;border-radius:5px;background:var(--chip2);border:1px solid var(--chipbd);color:var(--mut);font-size:11px;display:grid;place-items:center}
+  .g-body{flex:1;min-height:0;display:flex}
+  .g-side{flex:0 0 42%;min-height:0;display:flex;flex-direction:column;border-left:1px solid var(--edge)}
+  .g-ptabs{height:36px;flex:none;display:flex;align-items:center;gap:4px;padding:0 10px;border-bottom:1px solid var(--edge)}
+  .g-tab{font-size:12px;color:var(--mut);padding:5px 10px;border-radius:7px}
+  .g-tab.on{color:var(--fg);background:var(--chip2);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  .g-chev{margin-left:auto;color:var(--mut);display:grid;place-items:center}
+  .g-chev svg{width:16px;height:16px}
+  .g-term{flex:1;padding:10px 16px;font-family:var(--mono);font-size:12.5px;color:var(--fg)}
+  .g-term .d{width:8px;height:8px;border:1.4px solid var(--mut);border-radius:50%;display:inline-block;vertical-align:middle;margin-right:9px}
+  .g-term .p{color:var(--mut)}
+  .g-cur{display:inline-block;width:7px;height:14px;background:var(--fg);vertical-align:-2px;margin-left:2px}
+  .g-status{height:26px;flex:none;display:flex;align-items:center;padding:0 14px;border-top:1px solid var(--edge)}
+  .g-sr{margin-left:auto;color:var(--mut);display:grid;place-items:center}
+  .g-sr svg{width:14px;height:14px}
 
-  /* ===== app window frame (recreates the desktop window) ===== */
-  .frame{width:920px;max-width:100%;height:560px;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.12),0 40px 80px rgba(0,0,0,.14);border:1px solid var(--hairline);background:var(--page);display:flex;flex-direction:column;position:relative}
-  .frame.sm{height:420px}
-  .traffic{position:absolute;top:19px;left:18px;display:flex;gap:8px;z-index:60}
-  .traffic i{width:12px;height:12px;border-radius:50%}
-  .traffic .r{background:#ff5f57}.traffic .y{background:#febc2e}.traffic .g{background:#28c840}
-
-  /* topbar */
-  .topbar{height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 14px 0 86px;background:rgba(245,245,247,.9);border-bottom:1px solid var(--hairline)}
-  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
-  .topbar .bmark{width:22px;height:22px;display:block}
-  .focus{margin:0 auto;display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;background:var(--surface);border:1px solid var(--hairline);padding:6px 14px;border-radius:var(--r-pill);box-shadow:var(--shadow-sm)}
-  .focus.empty{color:var(--gray);font-weight:500}
-  .focus .kbd{font-size:10px;color:var(--gray2);border:1px solid var(--hairline);border-radius:5px;padding:1px 5px}
-  .actions{display:flex;align-items:center;gap:2px}
-  .iconbtn{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:var(--gray);background:none;border:0;cursor:pointer}
-  .iconbtn:hover{background:var(--card);color:var(--ink)}
-  .iconbtn.on{background:var(--ink);color:#fff}
-  .iconbtn svg{width:17px;height:17px}
-
-  /* canvas */
-  .cbody{flex:1;display:flex;min-height:0}
-  .canvas{flex:1;position:relative;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 1px 1px,var(--hairline) 1px,transparent 0) 0 0/22px 22px,var(--page)}
-  .empty{text-align:center;color:var(--gray);max-width:360px;padding:30px}
-  .empty .big{width:54px;height:54px;border-radius:16px;background:var(--card);display:grid;place-items:center;margin:0 auto 16px}
-  .empty .big svg{width:26px;height:26px;color:var(--gray2)}
-  .empty h3{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:6px;letter-spacing:-.02em}
-  .empty p{font-size:13.5px;line-height:1.5}
-  .empty .cta{margin-top:16px;display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:13.5px;padding:9px 16px;border-radius:var(--r-pill)}
-  .artboard{background:var(--surface);border-radius:var(--r-card);box-shadow:var(--shadow);border:1px solid var(--hairline);width:62%;height:66%;display:grid;place-items:center;overflow:hidden}
-
-  .statuspill{position:absolute;left:16px;bottom:16px;display:flex;align-items:center;gap:9px;background:var(--surface);box-shadow:var(--shadow);border:1px solid var(--hairline);padding:8px 14px;border-radius:var(--r-pill);font-size:12.5px;font-weight:600}
-  .statuspill .dot{width:8px;height:8px;border-radius:50%;background:var(--gray2)}
-  .statuspill .dot.run{background:var(--green);box-shadow:0 0 0 3px var(--green-bg)}
-  .statuspill .dot.work{background:var(--orange);box-shadow:0 0 0 3px var(--orange-bg)}
-  .statuspill .sub{color:var(--gray);font-weight:400}
-  .zoom{position:absolute;right:16px;bottom:16px;display:flex;align-items:center;gap:4px;background:var(--surface);box-shadow:var(--shadow);border:1px solid var(--hairline);padding:5px 6px;border-radius:var(--r-pill);font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums}
-  .zoom b{min-width:42px;text-align:center;font-weight:700}
-  .zoom i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:var(--gray);font-style:normal}
-
-  /* floating terminal window */
-  .fwin{position:absolute;background:var(--surface);border:1px solid var(--hairline);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.12),0 26px 64px rgba(0,0,0,.16);display:flex;flex-direction:column;overflow:hidden}
-  .fwin-header{height:36px;flex:none;display:flex;align-items:center;gap:8px;padding:0 8px 0 12px;background:linear-gradient(var(--surface),var(--page));border-bottom:1px solid var(--hairline)}
-  .fwin-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-bg)}
-  .fwin-icon{width:15px;height:15px;color:var(--gray);display:grid;place-items:center}
-  .fwin-icon svg{width:15px;height:15px}
-  .fwin-title{font-size:12px;font-weight:600;letter-spacing:-.01em}
-  .fwin-min{margin-left:auto;width:24px;height:24px;border-radius:7px;color:var(--gray);display:grid;place-items:center}
-  .fwin-min svg{width:15px;height:15px}
-  .fwin-body{flex:1;min-height:0;position:relative;padding:10px 12px;font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--ink);overflow:hidden}
-  .fwin-body .muted{color:var(--gray)}
-  .fwin-body .b{color:var(--blue)}.fwin-body .g{color:var(--green)}.fwin-body .o{color:var(--orange)}
-  .fwin-body .cur{display:inline-block;width:7px;height:14px;background:var(--blue);vertical-align:-2px;border-radius:1px}
-  .fwin-resize{position:absolute;right:2px;bottom:2px;width:16px;height:16px;color:var(--gray2);display:grid;place-items:center}
-  .fwin-resize svg{width:13px;height:13px}
-
-  /* activity panel */
-  .activity{width:300px;flex:none;background:var(--surface);border-left:1px solid var(--hairline);display:flex;flex-direction:column}
-  .ahead{height:46px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 18px;border-bottom:1px solid var(--hairline)}
-  .ahead h3{font-size:14px;font-weight:700}
-  .alist{flex:1;overflow:hidden;padding:6px}
-  .arow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:11px 12px;border-radius:var(--r-md)}
-  .arow .hash{font-family:var(--mono);font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px}
-  .arow .hash svg{width:12px;height:12px;color:var(--gray2)}
-  .arow .subj{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .arow .subj .c{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#fff;background:var(--blue);padding:2px 8px;border-radius:var(--r-pill);margin-right:8px}
-  .arow .stat{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;justify-self:end}
-  .arow .stat .when{color:var(--gray);font-weight:400;font-variant-numeric:tabular-nums}
-  .sd{width:9px;height:9px;border-radius:50%}
-  .sd.current{background:var(--green)}.sd.past{background:var(--gray2)}.sd.building{background:var(--orange)}.sd.failed{background:var(--red)}
-
-  /* command palette */
-  .palette{width:560px;max-width:100%;background:var(--surface);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;border:1px solid var(--hairline)}
-  .pinput{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--hairline)}
-  .pinput svg{width:18px;height:18px;color:var(--gray)}
-  .pinput input{border:0;outline:0;font-family:inherit;font-size:16px;background:none;width:100%}
-  .plist{padding:6px}
-  .pitem{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--r-md);font-size:13.5px}
-  .pitem .nm{font-weight:600}
-  .pitem .pth{color:var(--gray);font-size:12px;margin-left:auto;font-family:var(--mono)}
-  .pitem .fic{width:16px;height:16px;color:var(--gray)}
-  .pitem.sel{background:var(--blue);color:#fff}
-  .pitem.sel .pth{color:rgba(255,255,255,.8)}.pitem.sel .fic{color:#fff}
-  .pfoot{padding:8px 16px;border-top:1px solid var(--hairline);font-size:11px;color:var(--gray2);display:flex;gap:14px}
-  .pfoot b{color:var(--gray);font-weight:600}
-
-  /* primitives row */
-  .pill{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;padding:8px 14px;border-radius:var(--r-pill)}
-  .pill.blue{background:var(--blue-bg);color:var(--blue)}.pill.green{background:var(--green-bg);color:var(--green)}
-  .pill.orange{background:var(--orange-bg);color:var(--orange)}.pill.gray{background:var(--card);color:var(--gray)}
-  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;max-width:760px}
-  .sw{border-radius:var(--r-sm);overflow:hidden;box-shadow:var(--shadow-sm);background:var(--surface)}
-  .sw .c{height:54px}.sw .m{padding:8px 10px;font-size:11px}.sw .m b{display:block;font-size:12px}.sw .m span{color:var(--gray);font-family:var(--mono);font-size:10px}
-  .panelbox{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-card);box-shadow:var(--shadow);overflow:hidden}
+  /* pieces */
+  .panelbox{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+  .sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;max-width:600px}
+  .sw .s{border:1px solid var(--line);border-radius:10px;overflow:hidden}.sw .s .c{height:46px}
+  .sw .s .m{padding:7px 10px;font-size:11px}.sw .s .m b{display:block;font-size:12px}.sw .s .m span{color:var(--label);font-family:var(--mono);font-size:10px}
 </style>
 </head>
 <body>
-
-<header class="top"><div class="wrap">
+<header class="top"><div class="in">
   <a class="brand" href="index.html"><img src="cowboy.svg" alt="" />Dogfood</a>
   <span class="sub">UI Gallery</span>
-  <a class="tag" href="index.html">← Docs</a>
+  <a class="back" href="index.html">← Docs</a>
 </div></header>
 
-<div class="wrap">
-
-<!-- ============ 1. FULL APP — focused + terminal + activity ============ -->
-<div class="sec">
-  <h2>1 · Full app — focused, terminal floating, activity open</h2>
-  <p class="note">The whole thing together: top bar, canvas, the floating terminal window, and the activity panel. This is the composite to design against.</p>
-  <div class="frame">
-    <div class="traffic"><i class="r"></i><i class="y"></i><i class="g"></i></div>
-    <div class="topbar">
-      <div class="brand"><img class="bmark" src="cowboy.svg" alt="Cowboy">dogfood</div>
-      <div class="focus">Button.tsx <span class="kbd">⌘P</span></div>
-      <div class="actions">
-        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
-        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-        <button class="iconbtn on"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2 6 4-14 2 8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="iconbtn on"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      </div>
-    </div>
-    <div class="cbody">
-      <div class="canvas">
-        <div class="artboard"><div class="empty"><div class="big"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="#AEAEB2" stroke-width="2" stroke-linejoin="round"/><path d="M13 3v5h5" stroke="#AEAEB2" stroke-width="2" stroke-linejoin="round"/></svg></div><h3>Button.tsx</h3><p>src/components/Button.tsx</p></div></div>
-
-        <!-- floating terminal -->
-        <div class="fwin" style="left:300px;top:150px;width:430px;height:250px">
-          <div class="fwin-header"><span class="fwin-dot"></span><span class="fwin-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="fwin-title">claude — terminal</span><button class="fwin-min"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
-          <div class="fwin-body">
-            <div class="muted">~/myapp $ <span style="color:var(--ink)">claude</span></div>
-            <div class="b">⏺ Claude Code</div>
-            <div class="muted">&gt; make the hover state bouncier</div>
-            <div class="g">⏺ Updated Button.tsx — added a spring on hover</div>
-            <div>~/myapp $ <span class="cur"></span></div>
-          </div>
-          <div class="fwin-resize"><svg viewBox="0 0 16 16" fill="none"><path d="M13 7l-6 6M13 11l-2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-        </div>
-
-        <div class="statuspill"><span class="dot run"></span>Terminal <span class="sub">· myapp</span></div>
-        <div class="zoom"><i>−</i><b>100%</b><i>+</i></div>
-      </div>
-
-      <!-- activity panel -->
-      <div class="activity">
-        <div class="ahead"><h3>Activity</h3><button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
-        <div class="alist">
-          <div class="arow"><span class="hash"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M2 12h6M16 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>b7e2a1d</span><span class="subj"><span class="c">→ Current</span>spring on hover</span><span class="stat"><span class="sd current"></span><span class="when">now</span></span></div>
-          <div class="arow"><span class="hash"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M2 12h6M16 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>a4d9c3f</span><span class="subj">round the corners</span><span class="stat"><span class="sd past"></span><span class="when">4m</span></span></div>
-          <div class="arow"><span class="hash"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M2 12h6M16 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>c8f4b2e</span><span class="subj">initial Button</span><span class="stat"><span class="sd past"></span><span class="when">12m</span></span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 2. EMPTY STATE ============ -->
-<div class="sec">
-  <h2>2 · Empty state — no component focused</h2>
-  <p class="note">What you see on open, before picking a component. The whole canvas is the invite.</p>
-  <div class="frame sm">
-    <div class="traffic"><i class="r"></i><i class="y"></i><i class="g"></i></div>
-    <div class="topbar">
-      <div class="brand"><img class="bmark" src="cowboy.svg" alt="Cowboy">dogfood</div>
-      <div class="focus empty">Pick a component <span class="kbd">⌘P</span></div>
-      <div class="actions">
-        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
-        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2 6 4-14 2 8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      </div>
-    </div>
-    <div class="cbody"><div class="canvas">
-      <div class="empty">
-        <div class="big"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8c0-1 1-2 3-2s3 1 3 2M13 8c0-1 1-2 3-2s3 1 3 2M4 12h16c0 4-3 7-8 7s-8-3-8-7Z" stroke="#AEAEB2" stroke-width="2" stroke-linecap="round"/></svg></div>
-        <h3>myapp</h3>
-        <p>Open a project, then pick the component you want to forge. Prompt Claude Code in the terminal and watch it render here.</p>
-        <div class="cta">Pick a component&nbsp; ⌘P</div>
-      </div>
-      <div class="statuspill"><span class="dot"></span>claude <span class="sub">· myapp</span></div>
-      <div class="zoom"><i>−</i><b>100%</b><i>+</i></div>
-    </div></div>
-  </div>
-</div>
-
-<!-- ============ 3. PIECES ============ -->
-<div class="sec">
-  <h2>3 · Pieces — top bar, command palette, floating terminal</h2>
-  <div class="row">
-    <div>
-      <p class="label">Top bar</p>
-      <div class="panelbox" style="width:560px;max-width:100%">
-        <div class="topbar" style="background:var(--page)">
-          <div class="brand"><img class="bmark" src="cowboy.svg" alt="Cowboy">dogfood</div>
-          <div class="focus">Button.tsx <span class="kbd">⌘P</span></div>
-          <div class="actions">
-            <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
-            <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-            <button class="iconbtn on"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2 6 4-14 2 8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="row" style="margin-top:26px">
-    <div>
-      <p class="label">Command palette (⌘P)</p>
-      <div class="palette">
-        <div class="pinput"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input value="butt" readonly></div>
-        <div class="plist">
-          <div class="pitem sel"><span class="fic"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="nm">Button.tsx</span><span class="pth">src/components/Button.tsx</span></div>
-          <div class="pitem"><span class="fic"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="nm">IconButton.tsx</span><span class="pth">src/ui/IconButton.tsx</span></div>
-          <div class="pitem"><span class="fic"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="nm">ButtonGroup.tsx</span><span class="pth">src/ui/ButtonGroup.tsx</span></div>
-        </div>
-        <div class="pfoot"><span><b>↑↓</b> navigate</span><span><b>↵</b> focus</span><span><b>esc</b> close</span></div>
-      </div>
-    </div>
-
-    <div>
-      <p class="label">Floating terminal window</p>
-      <div class="fwin" style="position:relative;left:0;top:0;width:400px;height:230px">
-        <div class="fwin-header"><span class="fwin-dot"></span><span class="fwin-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="fwin-title">claude — terminal</span><button class="fwin-min"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
-        <div class="fwin-body">
-          <div class="muted">~/myapp $ <span style="color:var(--ink)">claude</span></div>
-          <div class="b">⏺ Claude Code · ready</div>
-          <div class="muted">&gt; build a pill button</div>
-          <div class="g">⏺ Created Button.tsx</div>
-          <div>~/myapp $ <span class="cur"></span></div>
-        </div>
-        <div class="fwin-resize"><svg viewBox="0 0 16 16" fill="none"><path d="M13 7l-6 6M13 11l-2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 4. SMALL CONTROLS ============ -->
-<div class="sec">
-  <h2>4 · Small controls — status pill, zoom, icon buttons</h2>
-  <div class="row" style="align-items:center">
-    <div><p class="label">Status pill — idle / working / ready</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;position:static">
-        <span class="statuspill" style="position:static"><span class="dot"></span>claude <span class="sub">· myapp</span></span>
-        <span class="statuspill" style="position:static"><span class="dot work"></span>claude <span class="sub">· editing Button.tsx…</span></span>
-        <span class="statuspill" style="position:static"><span class="dot run"></span>Terminal <span class="sub">· myapp</span></span>
-      </div>
-    </div>
-    <div><p class="label">Zoom</p><span class="zoom" style="position:static"><i>−</i><b>100%</b><i>+</i></span></div>
-    <div><p class="label">Icon buttons</p>
-      <div style="display:flex;gap:6px">
-        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
-        <button class="iconbtn on"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 5. TOKENS ============ -->
-<div class="sec">
-  <h2>5 · Tokens — color, type, pills</h2>
-  <p class="label">Color</p>
-  <div class="swatches" id="sw"></div>
-  <p class="label" style="margin-top:24px">Pills & badges</p>
-  <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <span class="pill blue">✓ Single focus</span><span class="pill green">✓ Real terminal</span>
-    <span class="pill orange">● Working</span><span class="pill gray">○ Idle</span>
-  </div>
-  <p class="label" style="margin-top:24px">Type — SF Pro / system</p>
-  <div style="font-size:30px;font-weight:700;letter-spacing:-.03em">Build the maker</div>
-  <div style="font-size:16px;font-weight:600;margin-top:6px">Pick a component to focus</div>
-  <div style="font-family:var(--mono);font-size:13px;color:var(--gray);margin-top:6px">~/myapp $ claude</div>
-</div>
-
-</div>
+<div class="wrap" id="g"></div>
 
 <script>
-  const SW=[['Blue','#007AFF'],['Blue bg','#E9F2FF'],['Green','#34C759'],['Green bg','#E6F8EC'],['Pink','#FF6482'],['Orange','#FF9500'],['Red','#FF3B30'],['Ink','#1C1C1E'],['Gray','#8E8E93'],['Hairline','#E5E5EA'],['Card','#F2F2F7'],['Surface','#FFFFFF']];
-  document.getElementById('sw').innerHTML=SW.map(([n,h])=>`<div class="sw"><div class="c" style="background:${h};${h==='#FFFFFF'?'border-bottom:1px solid var(--hairline)':''}"></div><div class="m"><b>${n}</b><span>${h}</span></div></div>`).join('');
+  const SUN='<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>'
+  const MOON='<svg viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>'
+  const GEAR='<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13a7.8 7.8 0 0 0 0-2l2-1.5-2-3.4-2.3 1a7.6 7.6 0 0 0-1.7-1l-.3-2.6h-4l-.3 2.6a7.6 7.6 0 0 0-1.7 1l-2.3-1-2 3.4 2 1.5a7.8 7.8 0 0 0 0 2l-2 1.5 2 3.4 2.3-1a7.6 7.6 0 0 0 1.7 1l.3 2.6h4l.3-2.6a7.6 7.6 0 0 0 1.7-1l2.3 1 2-3.4-2-1.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>'
+  const CHEV='<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  const PANELR='<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M15 4v16" stroke="currentColor" stroke-width="1.7"/></svg>'
+  const LOG='<svg viewBox="0 0 24 24" fill="none"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3 8.5M3 4.5v4h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8v4.2l2.8 1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  const SC=[['Hide Terminal',['⌘','J']],['Search Files',['⌘','P']],['Open Browser',['⇧','⌘','B']]]
+
+  function frame(theme){
+    const logo = theme==='dark' ? 'cowboy-inverse.svg' : 'cowboy.svg'
+    const themeIcon = theme==='dark' ? SUN : MOON
+    return `<div class="frame ${theme}">
+      <div class="g-title"><div class="g-lights"><i class="r"></i><i class="y"></i><i class="g"></i></div><div class="g-tt">Dogfood</div><div class="g-tr">${PANELR}${themeIcon}${GEAR}</div></div>
+      <div class="g-body">
+        <div class="g-canvas"><div class="g-welcome"><img class="g-logo" src="${logo}" alt="">
+          <div class="g-sc">${SC.map(([l,k])=>`<span class="g-sl">${l}</span><span class="g-sk">${k.map(x=>`<span class="g-key">${x}</span>`).join('')}</span>`).join('')}</div>
+        </div></div>
+        <div class="g-side">
+          <div class="g-ptabs"><span class="g-tab on">Terminal</span><span class="g-tab">Layers</span><span class="g-chev">${CHEV}</span></div>
+          <div class="g-term"><span class="d"></span><span class="p">$</span> npx tsc --noEmit 2&gt;&amp;1<div style="margin-top:6px"><span class="p">$</span> <span class="g-cur"></span></div></div>
+        </div>
+      </div>
+      <div class="g-status"><div class="g-sr">${LOG}</div></div>
+    </div>`
+  }
+
+  const SW=[['Ink','#1C1C1C'],['Surface','#FFFFFF'],['Blue','#007AFF'],['Green','#34C759'],['Geist Mono','mono']]
+  document.getElementById('g').innerHTML = `
+    <h2>Full app · Dark</h2>
+    ${frame('dark')}
+    <h2>Full app · Light</h2>
+    ${frame('light')}
+    <h2>Tokens</h2>
+    <div class="sw">${SW.map(([n,h])=>h==='mono'?`<div class="s"><div class="c" style="background:#1c1c1c;display:grid;place-items:center"><span style="font-family:var(--mono);color:#fff;font-size:18px">Aa</span></div><div class="m"><b>${n}</b><span>terminal</span></div></div>`:`<div class="s"><div class="c" style="background:${h};${h==='#FFFFFF'?'border-bottom:1px solid var(--line)':''}"></div><div class="m"><b>${n}</b><span>${h}</span></div></div>`).join('')}</div>
+  `
 </script>
 </body>
 </html>
