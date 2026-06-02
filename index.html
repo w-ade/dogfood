@@ -96,6 +96,29 @@
   .sw .s .m{padding:7px 10px;font-size:11px}.sw .s .m b{display:block;font-size:12px;color:var(--ink)}.sw .s .m span{color:var(--label);font-family:var(--mono);font-size:10px}
   .dl{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--blue);background:#e9f2ff;padding:8px 13px;border-radius:999px}
 
+  /* component inventory (cards + filters) */
+  .cbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .csearch{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--chip);border-radius:999px;padding:8px 14px}
+  .csearch svg{width:15px;height:15px;color:var(--label)}
+  .csearch input{border:0;background:none;outline:0;font-family:inherit;font-size:13.5px;width:100%;color:var(--ink)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chips.areas{margin-bottom:14px}
+  .chip{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--soft);background:var(--chip);border:0;padding:6px 12px;border-radius:999px;cursor:pointer}
+  .chip:hover{color:var(--ink)}
+  .chip.on{background:var(--ink);color:#fff}
+  .ccount{font-size:12px;color:var(--faint);margin-bottom:14px}
+  .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  .ccard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .ccard .ch{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}
+  .ccard .cn{font-weight:600;font-size:14px;color:var(--ink);display:flex;align-items:center;gap:7px}
+  .ccard .dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .ccard .cd{font-size:12.5px;color:var(--soft);line-height:1.45}
+  .ccard .cmeta{margin-top:10px;font-size:11px;color:var(--faint);font-weight:600;letter-spacing:.02em;text-transform:uppercase}
+  .ctag{font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:999px;flex:none}
+  .ctag.Built{background:#e6f8ec;color:#1f9d4d}
+  .ctag.Planned{background:#e9f2ff;color:#2f7fe0}
+  .ctag.Future{background:var(--chip);color:var(--label)}
+
   .foot{max-width:1100px;margin:0 auto;padding:0 32px 50px;color:var(--faint);font-size:12.5px}
 </style>
 </head>
@@ -164,30 +187,20 @@
     <!-- COMPONENTS -->
     <div class="page" id="components">
       <h1>Components</h1>
-      <p class="lede">The building blocks of the Dogfood app — what's built and what's planned.</p>
+      <p class="lede">Every building block of the app — current and planned — across each area. Filter by status or area, or search.</p>
 
-      <div class="grp-h">Shell</div>
-      <div class="crow"><span class="cn">TitleBar</span><span class="cd">— thin macOS title bar: name, theme, settings</span><span class="tag built">Built</span></div>
-      <div class="crow"><span class="cn">ThemeToggle</span><span class="cd">— sun/moon light–dark switch</span><span class="tag built">Built</span></div>
-      <div class="crow"><span class="cn">StatusBar</span><span class="cd">— slim footer with activity log</span><span class="tag built">Built</span></div>
-
-      <div class="grp-h">Canvas</div>
-      <div class="crow"><span class="cn">Canvas</span><span class="cd">— gridded, translucent stage</span><span class="tag built">Built</span></div>
-      <div class="crow"><span class="cn">PreviewFrame</span><span class="cd">— live render of the focused component</span><span class="tag planned">Planned</span></div>
-      <div class="crow"><span class="cn">ElementPicker</span><span class="cd">— pointer tool to select an element</span><span class="tag planned">Planned</span></div>
-
-      <div class="grp-h">Terminal</div>
-      <div class="crow"><span class="cn">TerminalPanel</span><span class="cd">— resizable bottom panel</span><span class="tag built">Built</span></div>
-      <div class="crow"><span class="cn">TerminalTabs</span><span class="cd">— multiple live shells as tabs</span><span class="tag built">Built</span></div>
-      <div class="crow"><span class="cn">Terminal</span><span class="cd">— xterm + node-pty, Geist Mono</span><span class="tag built">Built</span></div>
-
-      <div class="grp-h">Navigation</div>
-      <div class="crow"><span class="cn">CommandPalette</span><span class="cd">— ⌘P fuzzy file open</span><span class="tag built">Built</span></div>
-      <div class="crow"><span class="cn">ProjectPicker</span><span class="cd">— open-folder (Cursor model)</span><span class="tag built">Built</span></div>
-
-      <div class="grp-h">Design system</div>
-      <div class="crow"><span class="cn">Cowboy mark</span><span class="cd">— primary + inverse logomark</span><span class="tag built">Built</span></div>
-      <div class="crow"><span class="cn">Tokens</span><span class="cd">— color, type, radii</span><span class="tag built">Built</span></div>
+      <div class="cbar">
+        <label class="csearch"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="csearch" placeholder="Search components…" /></label>
+        <div class="chips" id="cstatus">
+          <button class="chip on" data-s="all">All</button>
+          <button class="chip" data-s="Built">Built</button>
+          <button class="chip" data-s="Planned">Planned</button>
+          <button class="chip" data-s="Future">Future</button>
+        </div>
+      </div>
+      <div class="chips areas" id="careas"></div>
+      <div class="ccount" id="ccount"></div>
+      <div class="cgrid" id="cgrid"></div>
     </div>
 
     <!-- ARCHITECTURE -->
@@ -262,6 +275,77 @@
       window.scrollTo({ top: 0 })
     })
   })
+
+  // ---- component inventory ----
+  const AREA_C = { Shell:'#007aff', Canvas:'#34c759', Preview:'#30b0c7', Terminal:'#1c1c1e', Navigation:'#ff9500', Activity:'#ff6482', Build:'#af52de', 'Design system':'#007aff' }
+  const COMPONENTS = [
+    {n:'AppWindow',area:'Shell',status:'Built',d:'Frameless rounded window with macOS vibrancy.'},
+    {n:'TitleBar',area:'Shell',status:'Built',d:'Thin macOS title bar — name, theme, settings.'},
+    {n:'ThemeToggle',area:'Shell',status:'Built',d:'Sun/moon light–dark switch.'},
+    {n:'SettingsButton',area:'Shell',status:'Planned',d:'Gear opening app settings.'},
+    {n:'StatusBar',area:'Shell',status:'Built',d:'Slim footer with activity-log icon.'},
+    {n:'WindowMemory',area:'Shell',status:'Built',d:'Remembers window size & position.'},
+    {n:'Canvas',area:'Canvas',status:'Built',d:'Gridded, translucent stage.'},
+    {n:'GridBackground',area:'Canvas',status:'Built',d:'Faint dot grid, light & dark.'},
+    {n:'GlassSurface',area:'Canvas',status:'Built',d:'Frosted translucent backdrop.'},
+    {n:'ZoomControl',area:'Canvas',status:'Planned',d:'Zoom the artboard in / out.'},
+    {n:'BackgroundToggle',area:'Canvas',status:'Planned',d:'Light / dark / grid backdrop.'},
+    {n:'DeviceFrames',area:'Canvas',status:'Future',d:'Wrap the preview in device chrome.'},
+    {n:'ResponsiveWidths',area:'Canvas',status:'Future',d:'Mobile / tablet / desktop presets.'},
+    {n:'PreviewFrame',area:'Preview',status:'Planned',d:'Live render of the focus component.'},
+    {n:'PreviewEmptyState',area:'Preview',status:'Planned',d:'Invite to pick a component.'},
+    {n:'PreviewError',area:'Preview',status:'Planned',d:'Compile / runtime error overlay.'},
+    {n:'PreviewWrapper',area:'Preview',status:'Planned',d:'Per-project styles & providers context.'},
+    {n:'WrapperAutoSniff',area:'Preview',status:'Future',d:'Detect Tailwind / providers automatically.'},
+    {n:'ElementPicker',area:'Preview',status:'Planned',d:'Pointer tool to select an element.'},
+    {n:'ElementInspector',area:'Preview',status:'Future',d:'Edit a selected element’s props.'},
+    {n:'TerminalPanel',area:'Terminal',status:'Built',d:'Resizable bottom panel.'},
+    {n:'TerminalTabs',area:'Terminal',status:'Built',d:'Multiple live shells as tabs.'},
+    {n:'Terminal',area:'Terminal',status:'Built',d:'xterm + node-pty, Geist Mono.'},
+    {n:'TerminalToggle',area:'Terminal',status:'Built',d:'Chevron hide / show.'},
+    {n:'TerminalTheme',area:'Terminal',status:'Built',d:'Themed colors, transparent background.'},
+    {n:'AddTerminal',area:'Terminal',status:'Built',d:'+ spawns a new shell.'},
+    {n:'CommandPalette',area:'Navigation',status:'Built',d:'⌘P fuzzy file open.'},
+    {n:'FuzzyResults',area:'Navigation',status:'Built',d:'Result list inside the palette.'},
+    {n:'ProjectPicker',area:'Navigation',status:'Built',d:'Open-folder (Cursor model).'},
+    {n:'KeyboardShortcuts',area:'Navigation',status:'Built',d:'⌘J · ⌘P · ⇧⌘B.'},
+    {n:'RecentProjects',area:'Navigation',status:'Future',d:'Recents on launch.'},
+    {n:'ShortcutsOverlay',area:'Navigation',status:'Future',d:'⌘ cheatsheet.'},
+    {n:'ActivityPanel',area:'Activity',status:'Planned',d:'History of changes with status dots.'},
+    {n:'ActivityRow',area:'Activity',status:'Planned',d:'One change entry.'},
+    {n:'DebugLog',area:'Activity',status:'Planned',d:'Live build / event stream.'},
+    {n:'ProgressTracker',area:'Activity',status:'Future',d:'Per-task progress.'},
+    {n:'FocusComponent',area:'Build',status:'Planned',d:'Designate the component to forge.'},
+    {n:'SelfHealing',area:'Build',status:'Future',d:'Auto-detect & repair broken renders.'},
+    {n:'PropsPanel',area:'Build',status:'Future',d:'Flip props / states live.'},
+    {n:'VariantGallery',area:'Build',status:'Future',d:'See all variants at once.'},
+    {n:'MotionControls',area:'Build',status:'Future',d:'Replay / slow-mo / loop.'},
+    {n:'ComponentBoard',area:'Build',status:'Future',d:'Multi-cell board of pieces.'},
+    {n:'CowboyMark',area:'Design system',status:'Built',d:'Primary + inverse logomark.'},
+    {n:'Tokens',area:'Design system',status:'Built',d:'Color, type, radii.'},
+    {n:'Tab',area:'Design system',status:'Built',d:'Terminal / section tabs.'},
+    {n:'Card',area:'Design system',status:'Built',d:'Rounded surface.'},
+    {n:'StatusTag',area:'Design system',status:'Built',d:'Built / Planned / Future chips.'},
+    {n:'Button',area:'Design system',status:'Planned',d:'Primary / secondary.'},
+    {n:'Tooltip',area:'Design system',status:'Planned',d:'Hover hint.'},
+    {n:'Toast',area:'Design system',status:'Future',d:'Transient notifications.'}
+  ]
+  const careas = document.getElementById('careas')
+  if (careas) {
+    const areas = [...new Set(COMPONENTS.map((c) => c.area))]
+    careas.innerHTML = '<button class="chip on" data-a="all">All areas</button>' + areas.map((a) => `<button class="chip" data-a="${a}">${a}</button>`).join('')
+    let fS = 'all', fA = 'all', q = ''
+    const render = () => {
+      const items = COMPONENTS.filter((c) => (fS === 'all' || c.status === fS) && (fA === 'all' || c.area === fA) && (!q || (c.n + ' ' + c.d + ' ' + c.area).toLowerCase().includes(q)))
+      document.getElementById('cgrid').innerHTML = items.map((c) => `<div class="ccard"><div class="ch"><span class="cn"><span class="dot" style="background:${AREA_C[c.area] || '#aaa'}"></span>${c.n}</span><span class="ctag ${c.status}">${c.status}</span></div><div class="cd">${c.d}</div><div class="cmeta">${c.area}</div></div>`).join('') || '<p style="color:var(--faint)">No components match.</p>'
+      const built = COMPONENTS.filter((c) => c.status === 'Built').length
+      document.getElementById('ccount').textContent = `${items.length} of ${COMPONENTS.length} shown · ${built} built`
+    }
+    document.getElementById('cstatus').addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (!b) return; fS = b.dataset.s; [...e.currentTarget.children].forEach((x) => x.classList.toggle('on', x === b)); render() })
+    careas.addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (!b) return; fA = b.dataset.a; [...careas.children].forEach((x) => x.classList.toggle('on', x === b)); render() })
+    document.getElementById('csearch').addEventListener('input', (e) => { q = e.target.value.toLowerCase().trim(); render() })
+    render()
+  }
 </script>
 </body>
 </html>
