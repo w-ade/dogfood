@@ -1,0 +1,28 @@
+# Roadmap
+
+## v0 — the spine
+
+The smallest thing that delivers the loop. Weekend-shaped.
+
+- [ ] Electron shell (Electron + Vite + React)
+- [ ] Real pty terminal pane (`xterm` + `node-pty`) running `claude`
+- [ ] Open-project-folder picker
+- [ ] Designate a focus component
+- [ ] Embedded Vite preview server pointed at the project
+- [ ] Per-project preview wrapper (manual to start)
+- [ ] Single-focus canvas, one frame
+
+## Later (deliberately deferred)
+
+- Board of multiple component cells (the preview is built as a cell to allow this)
+- Canvas controls: zoom, light/dark/grid background, responsive width presets, device frames
+- Wrapper auto-generation by sniffing the project
+- A controls panel to flip props / states / variants
+- Project memory + Cursor-style recents
+- Motion-specific preview controls (replay / slow-mo / loop)
+
+## Not doing
+
+- A drawing engine (that's Crisp's territory, and Dogfood explicitly isn't that)
+- A board on day one
+- Sealed scratchpad + copy-out flow (we chose the connected/Cursor model instead)

@@ -1,0 +1,64 @@
+# Architecture
+
+## The loop is the whole thing
+
+```
+┌─────────────┬──────────────────┐
+│  terminal   │   live canvas    │
+│  (claude)   │   (the preview)  │
+│             │                  │
+│  you prompt │  Vite hot-reloads│
+│  CC edits ──┼──> the focus     │
+│  a file     │   component      │
+└─────────────┴──────────────────┘
+        the real repo on disk
+```
+
+Everything serves making the left → right loop feel instant.
+
+## v0 spine
+
+- **Electron shell** — matches the Crisp / yawp stack (Electron + Vite + React).
+- **Real pty terminal** — `xterm` + `node-pty`, spawning the `claude` CLI. Full shell.
+- **Open project folder** — a Cursor-style picker; the chosen repo is the working dir for
+  both the terminal and the preview.
+- **Focus component** — you designate the one file being previewed.
+- **Preview engine** — Dogfood runs its own small Vite dev server pointed at the opened
+  project, so it can compile and hot-reload the focus component.
+- **Preview wrapper** — see below.
+
+## The preview wrapper
+
+Cursor opens a folder to *edit*. Dogfood also has to *render* one component live — and a
+naked component usually won't render correctly without the project's styling, fonts,
+providers, and Tailwind/PostCSS config.
+
+So per project, Dogfood uses a small wrapper file — conceptually:
+
+```tsx
+// dogfood.wrapper.tsx  (per project, set once)
+import '../src/styles/globals.css'      // the app's real styles
+import { Providers } from '../src/app/providers'
+import Focus from './dogfood.focus'      // whatever you're working on
+
+export default function Preview() {
+  return (
+    <Providers>
+      <Focus />
+    </Providers>
+  )
+}
+```
+
+Set it once; from then on the focus component renders dressed in the app's real look.
+
+Open question: how much of this can Dogfood **infer** by sniffing the project (detecting
+Tailwind, a root providers file, a globals stylesheet) vs. asking you to fill it in.
+
+## Stack notes
+
+- Electron + Vite + React (shared with Crisp / yawp).
+- Terminal: `xterm.js` + `node-pty`.
+- Preview: an embedded Vite server + an iframe/webview rendering the wrapper.
+- The opened project is untouched except for the focus file and a small Dogfood config
+  (wrapper + remembered focus) — ideally tucked in a single `.dogfood/` folder.

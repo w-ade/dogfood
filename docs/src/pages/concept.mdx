@@ -1,0 +1,47 @@
+# Concept
+
+## What it is
+
+Dogfood is a **fabrication tool for UI pieces**. You open a real project, point at one
+component (the "focus"), and use an embedded Claude Code terminal to build and refine it
+while a live canvas renders it — dressed in the project's own styling.
+
+The verb is **making**: prompt → render → it's already in the repo.
+
+## What it isn't
+
+It's easy to confuse Dogfood with Crisp, since both are small Electron desktop tools for
+a designer with a canvas. But the verb is different, and the verb is everything:
+
+| | Crisp | Dogfood |
+|---|---|---|
+| Object | Brand marks (logos/icons/glyphs) | UI components (buttons/tables/Motion) |
+| Medium | Static vector | Live code |
+| Engine | No drawing engine | Hot-reloading preview |
+| Driver | Direct manipulation | A real terminal running Claude Code |
+| Output | Blueprint / spec docs | Working code, already in your repo |
+| Verb | **Describes** a finished mark | **Makes** a working piece |
+
+Sibling, not the same kid. The terminal + live-render loop is Dogfood's DNA and has no
+home in Crisp's "no drawing engine, spec-views" wedge.
+
+## Why single focus
+
+One component at a time, like a single Figma frame. Focused refinement is the whole
+point — it removes peripheral noise and suits the way attention actually works. A "board
+of many cells" may come later, but the day-one experience is **one frame, one piece**.
+
+## Why a real terminal
+
+Not a stripped-down chat box — a true terminal (xterm + node-pty) running `claude`. You
+get full power: run `npm`, `git`, anything. It just happens to open into Claude Code.
+Cheaper to build *and* more flexible. "Do it all. Dogfood."
+
+## Why connected (the Cursor model)
+
+Open the app → choose a project folder → Claude Code edits the *actual* files in the
+*actual* repo. No copy-out step, because the piece is born where it belongs. This kills a
+context switch.
+
+The trade-off: rendering a real component live needs the project's styling and providers.
+Dogfood handles that with a [preview wrapper](/architecture#the-preview-wrapper).

@@ -1,0 +1,13 @@
+{
+  "project": "dogfood",
+  "current": "v0",
+  "versions": [
+    {
+      "id": "v0",
+      "label": "v0 · pre-build",
+      "date": "2026-06-02",
+      "path": "/dogfood/v0/",
+      "note": "First frozen snapshot — product shape, decisions, and component inventory defined; pre-build."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+# Dogfood
+
+A tiny desktop forge where you prompt Claude Code to build a UI piece and watch it
+render live — in the real repo you opened.
+
+**Prompt → render → it's already home.**
+
+A "tiny Figma + Terminal + Cursor baby." One frame, one piece, full focus.
+
+---
+
+## Why
+
+You're constantly building small pieces — buttons, tables, icons, Motion bits — that
+belong to a bigger app. Switching into the whole app to make one component is heavy and
+noisy. Dogfood gives you a focused frame: open the project, point at the piece, talk to
+Claude Code in a real terminal, and watch it render live with your app's real styling.
+
+No "now go paste this somewhere else" step. You're already in the repo.
+
+## North star
+
+> Build the maker, not the made.
+
+Every feature must speed the actual making of app pieces — not just polish the tool.
+
+## The loop
+
+```
+┌─────────────┬──────────────────┐
+│  terminal   │   live canvas    │
+│  (claude)   │   (the preview)  │
+│             │                  │
+│  you prompt │  Vite hot-reloads│
+│  CC edits ──┼──> the focus     │
+│  a file     │   component      │
+└─────────────┴──────────────────┘
+```
+
+See [Concept](/concept) for what it is (and isn't), [Decisions](/decisions) for what's
+locked, and [Architecture](/architecture) for the v0 spine.

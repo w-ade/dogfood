@@ -1,0 +1,73 @@
+# Decisions
+
+Locked decisions and the reasoning behind them. This page mirrors
+`brainstorming/decisions.md` in the project container.
+
+## 1. Its own product
+
+Not Crisp, not a mode inside yawp. The terminal + live-render loop is a strong, specific
+identity worth its own app. (See [Concept](/concept) for the Crisp distinction.)
+
+## 2. Single focus, not a board
+
+One component at a time. Focused refinement is the point. The preview is built as a
+*cell* internally, so "a board of cells" is a later add-on, not a rewrite — but it is not
+a day-one feature.
+
+## 3. Real shell terminal
+
+A true pty (xterm + node-pty) running `claude`. Full power, kept visually minimal. Not a
+fake chat UI.
+
+## 4. Connected to a real project (Cursor model)
+
+Open app → choose folder → Claude Code edits the actual repo files. No "lift" step.
+
+**Consequence:** a naked component usually won't render without the project's
+styles/providers, so Dogfood ships its own preview engine plus a per-project **preview
+wrapper**. See [Architecture](/architecture).
+
+## 5. Name: dogfood
+
+Lowercase, self-aware, sits next to `yawp` and `dev-lines`. It *is* the thesis — using
+your own tools to make your own tools.
+
+## 6. Focus selection: in-app file picker
+
+Pick the focus component from inside the app. (Not a fixed re-pointed file; not
+auto-follow-whatever-CC-touched.) Picker *style* — command palette vs. file tree — is
+still open.
+
+## 7. Preview wrapper: hybrid
+
+v0 ships a blank wrapper template you fill once per project. Auto-sniffing the project
+(Tailwind / globals / providers) to pre-fill it is a later upgrade.
+
+## 8. Layout: canvas-dominant, terminal as a drawer
+
+The canvas is the window; the terminal is a panel you summon. Maximizes
+looking-at-the-thing. See the drawer tension below.
+
+---
+
+## 9. Drawer behavior
+
+Resolves the canvas-vs-watch tension. The loop is *prompt → watch CC edit → see it
+render*, so during a build you want the terminal open; only after do you want it gone.
+
+- **Collapsed = thin status strip peeks** — a slim edge strip shows CC is mid-task (last
+  line / spinner / "editing Button.tsx…"). Stay aware while looking; tap to expand.
+- **Summon = keyboard + edge handle** — a shortcut (Cmd+J / Cmd+`) plus a visible edge
+  handle.
+- The drawer **docks beside the canvas** while building (not a modal overlay), so you see
+  CC streaming *and* the render at once.
+
+## Open questions
+
+- **Picker style** — command palette (Cmd+P) vs. persistent file tree.
+- **Canvas controls** — zoom, light/dark/grid background, responsive width presets, device
+  frames? How much Figma-ness on day one?
+- **Props / states** — a tiny controls panel to flip variants while looking? Later?
+- **Project memory** — remember last project + focus + wrapper per repo?
+- **Recents** — Cursor-style recent-projects list on launch?
+- **Motion** — replay / slow-mo / loop controls for animation previews?
