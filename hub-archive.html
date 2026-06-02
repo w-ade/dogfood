@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="cowboy.svg" />
+<title>Dogfood — Interactive Docs</title>
+<style>
+  :root{
+    /* palette — lifted from the Apple/iOS reference */
+    --blue:#007AFF;  --blue-bg:#E9F2FF;
+    --green:#34C759; --green-bg:#E6F8EC;
+    --pink:#FF6482;  --pink-bg:#FFEEF2;
+    --orange:#FF9500;--orange-bg:#FFF2E1;
+    --purple:#AF52DE;--purple-bg:#F5EBFC;
+    --ink:#1C1C1E;   --gray:#8E8E93;  --gray2:#AEAEB2;
+    --hairline:#E5E5EA;
+    --card:#F2F2F7;  --surface:#FFFFFF; --page:#F5F5F7;
+    /* shape */
+    --r-card:22px; --r-pill:999px; --r-md:16px; --r-sm:12px; --r-xs:10px;
+    --shadow:0 1px 2px rgba(0,0,0,.04), 0 10px 30px rgba(0,0,0,.06);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.05);
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  body{
+    font-family:var(--font); color:var(--ink); background:var(--page);
+    line-height:1.45; letter-spacing:-0.01em;
+    padding-bottom:120px;
+  }
+  ::selection{background:var(--blue-bg)}
+
+  /* ---------- top nav ---------- */
+  header.top{
+    position:sticky; top:0; z-index:50;
+    background:rgba(245,245,247,.78); backdrop-filter:saturate(180%) blur(20px);
+    border-bottom:1px solid var(--hairline);
+  }
+  .top-inner{max-width:980px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; gap:16px}
+  .brand{display:flex; align-items:center; gap:9px; font-weight:700; font-size:18px; letter-spacing:-0.02em}
+  .brand .mark{width:24px;height:24px;border-radius:8px;background:var(--ink);display:grid;place-items:center}
+  .brand .mark svg{width:14px;height:14px}
+  /* version switcher */
+  .vswitch{position:relative}
+  .ver{font-family:inherit;font-size:11px;font-weight:600;color:var(--gray);background:var(--card);border:0;cursor:pointer;padding:4px 9px;border-radius:var(--r-pill);letter-spacing:0;display:inline-flex;align-items:center;gap:5px;transition:color .15s}
+  .ver:hover{color:var(--ink)}
+  .ver svg{width:9px;height:9px;transition:transform .2s}
+  .vswitch.open .ver svg{transform:rotate(180deg)}
+  .vmenu{position:absolute;top:130%;left:0;min-width:190px;background:var(--surface);border-radius:var(--r-sm);box-shadow:var(--shadow);padding:6px;display:none;z-index:60}
+  .vswitch.open .vmenu{display:block;animation:fade .2s ease}
+  .vmenu a{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:13px;font-weight:600}
+  .vmenu a:hover{background:var(--card)}
+  .vmenu a .d{font-size:11px;color:var(--gray);font-weight:400;font-variant-numeric:tabular-nums}
+  .vmenu a.cur{color:var(--blue)}
+  .vmenu a.cur .d{color:var(--blue)}
+  .vmenu .vhead{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gray2);padding:6px 10px 4px}
+  nav.tabs{margin-left:auto; display:flex; gap:2px; background:var(--card); padding:4px; border-radius:var(--r-pill)}
+  nav.tabs button{
+    font-family:inherit; font-size:13.5px; font-weight:600; color:var(--gray);
+    border:0; background:transparent; padding:7px 14px; border-radius:var(--r-pill); cursor:pointer;
+    transition:all .18s ease;
+  }
+  nav.tabs button:hover{color:var(--ink)}
+  nav.tabs button.active{background:var(--surface); color:var(--ink); box-shadow:var(--shadow-sm)}
+
+  /* ---------- layout ---------- */
+  main{max-width:980px; margin:0 auto; padding:0 24px}
+  .panel{display:none; animation:fade .35s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  section{padding:38px 0; border-bottom:1px solid var(--hairline)}
+  section:last-child{border-bottom:0}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gray);margin-bottom:10px}
+  h1{font-size:40px;font-weight:700;letter-spacing:-0.03em;margin-bottom:8px}
+  h2{font-size:24px;font-weight:700;letter-spacing:-0.02em;margin-bottom:14px}
+  h3{font-size:17px;font-weight:700;letter-spacing:-0.01em;margin-bottom:6px}
+  p.lead{font-size:18px;color:var(--gray);max-width:60ch;margin-bottom:6px}
+  p{color:var(--ink)} .muted{color:var(--gray)}
+
+  /* ---------- cards & pills (the reference language) ---------- */
+  .card{background:var(--card); border-radius:var(--r-card); padding:22px}
+  .surface{background:var(--surface); border-radius:var(--r-card); box-shadow:var(--shadow); padding:22px}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:15px;font-weight:600;padding:9px 15px;border-radius:var(--r-pill)}
+  .pill svg{width:16px;height:16px}
+  .pill.blue{background:var(--blue-bg);color:var(--blue)}
+  .pill.green{background:var(--green-bg);color:var(--green)}
+  .pill.pink{background:var(--pink-bg);color:var(--pink)}
+  .pill.orange{background:var(--orange-bg);color:var(--orange)}
+  .pill.purple{background:var(--purple-bg);color:var(--purple)}
+  .pill.gray{background:var(--card);color:var(--gray)}
+  .tag{display:inline-flex;align-items:center;font-size:11.5px;font-weight:700;letter-spacing:.02em;padding:3px 9px;border-radius:var(--r-pill);text-transform:uppercase}
+  .tag.v0{background:var(--blue-bg);color:var(--blue)}
+  .tag.future{background:var(--card);color:var(--gray)}
+
+  /* ---------- hero spec card (mirrors the trip card) ---------- */
+  .specwrap{display:flex;flex-direction:column;gap:18px;margin-top:24px}
+  .idcard{background:var(--card);border-radius:var(--r-card);padding:22px 24px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .idcard .name{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700}
+  .idcard .ava{width:26px;height:26px;border-radius:8px;background:var(--pink-bg);display:grid;place-items:center}
+  .idcard .ava svg{width:16px;height:16px}
+  .idcard .rating{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:16px;font-weight:700}
+  .idcard .rating svg{width:17px;height:17px}
+  .idcard .rating .sub{color:var(--gray);font-weight:400}
+  .idcard .right{text-align:right;color:var(--gray);font-size:15px}
+  .idcard .right b{color:var(--ink)}
+  .pillrow{display:flex;gap:12px;flex-wrap:wrap}
+
+  /* timeline */
+  .timeline{margin-top:8px}
+  .timeline h3{margin-bottom:16px}
+  .stop{display:grid;grid-template-columns:34px 1fr auto;gap:4px 8px;align-items:start}
+  .stop .rail{position:relative;display:flex;justify-content:center}
+  .node{width:18px;height:18px;border-radius:50%;border:3px solid var(--gray2);background:var(--surface);margin-top:3px;z-index:1}
+  .node.blue{border-color:var(--blue)}
+  .node.done{border-color:var(--blue);background:var(--blue)}
+  .node.target{border-color:var(--gray2);box-shadow:inset 0 0 0 3px var(--surface),inset 0 0 0 5px var(--gray2)}
+  .line{position:absolute;top:18px;bottom:-16px;width:3px;background:var(--hairline);border-radius:2px}
+  .stop.activeleg .rail .line{background:var(--blue-bg)}
+  .stop.activeleg{background:linear-gradient(90deg,var(--blue-bg),transparent 40%);border-radius:14px;margin:0 -8px;padding:0 8px}
+  .stop .label{font-size:13px;color:var(--gray);font-weight:600}
+  .stop .place{font-size:16px;font-weight:600;margin-bottom:18px}
+  .stop .time{text-align:right;font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+  .stop .time .est{display:block;font-size:13px;color:var(--gray);font-weight:400}
+
+  /* ---------- component inventory ---------- */
+  .invbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 20px}
+  .search{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--card);border-radius:var(--r-pill);padding:10px 16px}
+  .search svg{width:16px;height:16px;color:var(--gray)}
+  .search input{border:0;background:transparent;font-family:inherit;font-size:15px;width:100%;outline:none;color:var(--ink)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--gray);background:var(--card);border:0;padding:8px 14px;border-radius:var(--r-pill);cursor:pointer;transition:all .15s}
+  .chip:hover{color:var(--ink)}
+  .chip.active{background:var(--ink);color:#fff}
+  .progress{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-size:14px;color:var(--gray)}
+  .bar{flex:1;height:8px;background:var(--card);border-radius:var(--r-pill);overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--blue);border-radius:var(--r-pill);transition:width .4s ease}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+  .comp{background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-sm);padding:16px 18px;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative}
+  .comp:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+  .comp .chead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+  .comp .cname{font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .comp .cdesc{font-size:13.5px;color:var(--gray);line-height:1.4}
+  .comp .cfoot{display:flex;align-items:center;gap:8px;margin-top:12px}
+  .comp .group{font-size:11.5px;font-weight:600;color:var(--gray2)}
+  .check{width:22px;height:22px;border-radius:7px;border:2px solid var(--hairline);display:grid;place-items:center;flex:none;transition:all .15s;background:var(--surface)}
+  .check svg{width:13px;height:13px;color:#fff;opacity:0;transition:opacity .15s}
+  .comp.built .check{background:var(--green);border-color:var(--green)}
+  .comp.built .check svg{opacity:1}
+  .comp.built .cname{color:var(--gray)}
+  .comp.built .cname .dot{background:var(--green)!important}
+  .dot{width:7px;height:7px;border-radius:50%;flex:none}
+
+  /* ---------- decisions accordion ---------- */
+  .acc{background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-sm);margin-bottom:10px;overflow:hidden}
+  .acc summary{list-style:none;cursor:pointer;padding:18px 20px;display:flex;align-items:center;gap:14px;font-weight:700;font-size:16px}
+  .acc summary::-webkit-details-marker{display:none}
+  .acc summary .num{width:26px;height:26px;flex:none;border-radius:8px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:13px}
+  .acc summary .chev{margin-left:auto;color:var(--gray2);transition:transform .2s}
+  .acc[open] summary .chev{transform:rotate(90deg)}
+  .acc .body{padding:0 20px 20px 60px;color:var(--gray);font-size:15px;line-height:1.55}
+  .acc .body b{color:var(--ink)}
+
+  /* ---------- architecture ---------- */
+  .loop{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}
+  .loop .box{background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-sm);padding:20px;text-align:center}
+  .loop .box .ic{width:40px;height:40px;border-radius:12px;margin:0 auto 12px;display:grid;place-items:center}
+  .loop .box h3{margin-bottom:4px}
+  .loop .box p{font-size:14px;color:var(--gray)}
+  pre{background:var(--ink);color:#E5E5EA;border-radius:var(--r-md);padding:18px 20px;overflow:auto;font-family:var(--mono);font-size:13px;line-height:1.6;margin:14px 0}
+  pre .c{color:#8E8E93}
+  pre .k{color:#6BB1FF}
+  pre .s{color:#7DD3A0}
+  .stacklist{list-style:none;display:grid;gap:8px;margin-top:6px}
+  .stacklist li{background:var(--card);border-radius:var(--r-sm);padding:12px 16px;font-size:15px;display:flex;gap:10px;align-items:center}
+  .stacklist li b{font-weight:700}
+  .stacklist .k{font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:3px 8px;border-radius:var(--r-pill)}
+
+  /* ---------- design tab ---------- */
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:8px 0 28px}
+  .sw{border-radius:var(--r-sm);overflow:hidden;box-shadow:var(--shadow-sm);background:var(--surface)}
+  .sw .chip2{height:64px}
+  .sw .meta{padding:10px 12px;font-size:12px}
+  .sw .meta b{display:block;font-size:13px;font-weight:700;margin-bottom:1px}
+  .sw .meta span{color:var(--gray);font-family:var(--mono);font-size:11px}
+  .typerow{display:flex;align-items:baseline;gap:14px;padding:12px 0;border-bottom:1px solid var(--hairline)}
+  .typerow span{color:var(--gray);font-size:12px;font-family:var(--mono);width:120px;flex:none}
+  .radii{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+  .radii .r{text-align:center}
+  .radii .r div{width:80px;height:80px;background:var(--blue-bg);border:2px solid var(--blue);margin-bottom:6px}
+  .radii .r span{font-size:12px;color:var(--gray);font-family:var(--mono)}
+
+  .footer{max-width:980px;margin:30px auto 0;padding:0 24px;color:var(--gray2);font-size:13px;text-align:center}
+  .galleryframe{width:100%;height:80vh;border:1px solid var(--hairline);border-radius:16px;background:var(--surface);box-shadow:var(--shadow-sm)}
+  .brand-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:560px}
+  .brand-cell{border-radius:var(--r-card);box-shadow:var(--shadow-sm);border:1px solid var(--hairline);padding:36px;display:grid;place-items:center;gap:18px}
+  .brand-cap{font-size:12px;font-weight:600;color:var(--gray)}
+  .brand-do{list-style:none;margin-top:8px;display:grid;gap:9px;max-width:62ch}
+  .brand-do li{display:flex;align-items:flex-start;gap:10px;font-size:14.5px;color:var(--ink)}
+  .brand-do .bd{width:8px;height:8px;border-radius:50%;margin-top:7px;flex:none}
+  .brand-do .bd.ok{background:var(--green)} .brand-do .bd.no{background:#FF3B30}
+  .dl{font-size:13px;font-weight:600;color:var(--blue);background:var(--blue-bg);padding:9px 14px;border-radius:var(--r-pill);text-decoration:none}
+  .dl:hover{filter:brightness(.97)}
+  @media(max-width:680px){
+    nav.tabs{display:none}
+    .loop{grid-template-columns:1fr}
+    h1{font-size:32px}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <span class="mark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8c0-1 1-2 3-2s3 1 3 2M13 8c0-1 1-2 3-2s3 1 3 2M4 12h16c0 4-3 7-8 7s-8-3-8-7Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span>
+      dogfood
+      <span class="vswitch" id="vswitch">
+        <button class="ver" id="verbtn"><span id="verlabel">v0</span><svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></button>
+        <div class="vmenu" id="vmenu"></div>
+      </span>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="active" data-tab="overview">Overview</button>
+      <button data-tab="components">Components</button>
+      <button data-tab="decisions">Decisions</button>
+      <button data-tab="architecture">Architecture</button>
+      <button data-tab="design">Design</button>
+      <button data-tab="branding">Branding</button>
+      <button data-tab="gallery">Gallery</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ===================== OVERVIEW ===================== -->
+<div class="panel active" id="overview">
+  <section>
+    <div class="eyebrow">The maker, not the made</div>
+    <h1>Dogfood</h1>
+    <p class="lead">A tiny desktop forge where you prompt Claude Code to build a UI piece and watch it render live — in the real repo you opened.</p>
+    <p class="muted" style="font-size:17px"><b style="color:var(--ink)">Prompt → render → it's already home.</b> A “tiny Figma + Terminal + Cursor baby.” One frame, one piece, full focus.</p>
+
+    <!-- spec card mirroring the reference trip card -->
+    <div class="specwrap">
+      <div class="idcard">
+        <div>
+          <div class="name"><span class="ava"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#FF6482"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" fill="#FF6482"/></svg></span>Dogfood</div>
+          <div class="rating"><svg viewBox="0 0 24 24" fill="#007AFF"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 17l-5.5 2.5 1-6.3L3 8.9 9 8z"/></svg>v0 <span class="sub">· desktop forge</span></div>
+        </div>
+        <div class="right">
+          Electron · Vite · React<br>
+          Stack: <b>shared with Crisp / yawp</b>
+        </div>
+      </div>
+
+      <div class="pillrow">
+        <span class="pill blue"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 1.8 3-.2 1 2.8 2.6 1.4-.6 3 1.6 2.5-2 2.2.2 3-2.8 1-1.4 2.6-3-.6L12 22l-2.5-1.6-3 .6-1.4-2.6-3-1 .2-3-2-2.2L2 9.6l-.6-3 2.6-1.4 1-2.8 3 .2z"/><path d="M8.5 12.5l2.5 2.5 4.5-5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>Single focus</span>
+        <span class="pill green"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l8 3v6c0 5-3.5 8-8 11-4.5-3-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5L15.5 9" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>Real terminal</span>
+        <span class="pill pink"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>Floating canvas</span>
+      </div>
+
+      <div class="card timeline">
+        <h3>Build Info</h3>
+        <div class="stop activeleg">
+          <div class="rail"><div class="node done"></div><div class="line"></div></div>
+          <div><div class="label">v0 · spine</div><div class="place">Shell · real terminal · open project · live preview</div></div>
+          <div class="time">now<span class="est">in focus</span></div>
+        </div>
+        <div class="stop">
+          <div class="rail"><div class="node blue"></div><div class="line"></div></div>
+          <div><div class="label">Next</div><div class="place">Wrapper auto-sniff · view controls · code peek</div></div>
+          <div class="time">soon</div>
+        </div>
+        <div class="stop">
+          <div class="rail"><div class="node"></div><div class="line"></div></div>
+          <div><div class="label">Later</div><div class="place">Props / states panel · project memory · recents</div></div>
+          <div class="time">later</div>
+        </div>
+        <div class="stop">
+          <div class="rail"><div class="node target"></div></div>
+          <div><div class="label">Horizon</div><div class="place">Board of cells · Motion controls · device frames</div></div>
+          <div class="time">future<span class="est">when earned</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The loop is the whole product</h2>
+    <p class="muted" style="margin-bottom:8px">Everything serves making the left → right loop feel instant.</p>
+    <div class="loop">
+      <div class="box">
+        <div class="ic" style="background:var(--ink)"><svg viewBox="0 0 24 24" width="20" fill="none"><path d="M5 7l4 4-4 4M11 15h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <h3>You prompt the terminal</h3>
+        <p>A real shell. Type <code>claude</code>, then talk. CC edits a file in your repo.</p>
+      </div>
+      <div class="box">
+        <div class="ic" style="background:var(--blue)"><svg viewBox="0 0 24 24" width="20" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="#fff" stroke-width="2"/><path d="M3 9h18" stroke="#fff" stroke-width="2"/></svg></div>
+        <h3>The canvas renders it live</h3>
+        <p>Your own Vite server hot-reloads the focus component, dressed in the app's real styling.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===================== COMPONENTS ===================== -->
+<div class="panel" id="components">
+  <section>
+    <div class="eyebrow">Everything that needs building</div>
+    <h2>Component inventory</h2>
+    <p class="muted" style="margin-bottom:6px">Current (v0) and future components. Tap a card to mark it built — your progress is saved locally.</p>
+
+    <div class="invbar">
+      <label class="search"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="csearch" placeholder="Search components…" /></label>
+    </div>
+    <div class="chips" id="scopechips" style="margin-bottom:10px">
+      <button class="chip active" data-scope="all">All</button>
+      <button class="chip" data-scope="v0">v0</button>
+      <button class="chip" data-scope="future">Future</button>
+    </div>
+    <div class="chips" id="groupchips" style="margin-bottom:18px"></div>
+
+    <div class="progress"><span id="ptext">0 / 0 built</span><div class="bar"><i id="pbar"></i></div></div>
+
+    <div class="grid" id="grid"></div>
+  </section>
+</div>
+
+<!-- ===================== DECISIONS ===================== -->
+<div class="panel" id="decisions">
+  <section>
+    <div class="eyebrow">What's locked & why</div>
+    <h2>Decisions</h2>
+    <p class="muted" style="margin-bottom:20px">Twelve decisions shape the v0. Tap to expand.</p>
+    <div id="acclist"></div>
+  </section>
+</div>
+
+<!-- ===================== ARCHITECTURE ===================== -->
+<div class="panel" id="architecture">
+  <section>
+    <div class="eyebrow">How it's wired</div>
+    <h2>Architecture</h2>
+    <p class="muted">The opened project lives on disk. The terminal and the preview both point at it.</p>
+    <pre><span class="c">┌─────────────┬──────────────────┐</span>
+<span class="c">│</span>  terminal   <span class="c">│</span>   live canvas    <span class="c">│</span>
+<span class="c">│</span>  (<span class="k">claude</span>)   <span class="c">│</span>   (the preview)  <span class="c">│</span>
+<span class="c">│</span>             <span class="c">│</span>                  <span class="c">│</span>
+<span class="c">│</span>  you prompt <span class="c">│</span>  Vite hot-reloads<span class="c">│</span>
+<span class="c">│</span>  CC edits ──┼──&gt; the focus     <span class="c">│</span>
+<span class="c">│</span>  a file     <span class="c">│</span>   component      <span class="c">│</span>
+<span class="c">└─────────────┴──────────────────┘</span>
+        the real repo on disk</pre>
+
+    <h3 style="margin-top:24px">v0 stack</h3>
+    <ul class="stacklist">
+      <li><span class="k">shell</span><b>Electron + Vite + React</b> — shared with Crisp / yawp</li>
+      <li><span class="k">terminal</span><b>xterm.js + node-pty</b> — a real shell; type <code>claude</code></li>
+      <li><span class="k">preview</span><b>embedded Vite dev server</b> — compiles & hot-reloads the focus file</li>
+      <li><span class="k">picker</span><b>open-folder + ⌘P palette</b> — choose project & focus component</li>
+      <li><span class="k">wrapper</span><b>per-project preview wrapper</b> — provides styles/providers (manual now, sniff later)</li>
+    </ul>
+
+    <h3 style="margin-top:24px">The preview wrapper</h3>
+    <p class="muted" style="margin-bottom:4px">A naked component won't render without the project's styling. Set this once per project:</p>
+    <pre><span class="c">// .dogfood/wrapper.tsx — set once per project</span>
+<span class="k">import</span> <span class="s">'../src/styles/globals.css'</span>
+<span class="k">import</span> { Providers } <span class="k">from</span> <span class="s">'../src/app/providers'</span>
+<span class="k">import</span> Focus <span class="k">from</span> <span class="s">'./focus'</span>   <span class="c">// whatever you're building</span>
+
+<span class="k">export default function</span> Preview() {
+  <span class="k">return</span> &lt;Providers&gt;&lt;Focus /&gt;&lt;/Providers&gt;
+}</pre>
+  </section>
+</div>
+
+<!-- ===================== DESIGN ===================== -->
+<div class="panel" id="design">
+  <section>
+    <div class="eyebrow">The visual system</div>
+    <h2>Design language</h2>
+    <p class="muted">Apple / iOS flavored — SF Pro, white &amp; soft-gray cards, system colors, fully-rounded pills. Calm, light, and spatial — floating capsules on a quiet canvas. The app wears this too.</p>
+
+    <h3 style="margin-top:24px">Color</h3>
+    <div class="swatches" id="swatches"></div>
+
+    <h3>Type — SF Pro / system</h3>
+    <div style="margin-bottom:28px">
+      <div class="typerow"><span>display / 40 / 700</span><div style="font-size:32px;font-weight:700;letter-spacing:-.03em">Build the maker</div></div>
+      <div class="typerow"><span>title / 24 / 700</span><div style="font-size:24px;font-weight:700;letter-spacing:-.02em">Component inventory</div></div>
+      <div class="typerow"><span>body / 16 / 600</span><div style="font-size:16px;font-weight:600">Pick a component to focus</div></div>
+      <div class="typerow"><span>label / 13 / 600</span><div style="font-size:13px;font-weight:600;color:var(--gray)">v0 · spine</div></div>
+      <div class="typerow"><span>mono / 13</span><div style="font-family:var(--mono);font-size:13px">~/myapp $ claude</div></div>
+    </div>
+
+    <h3>Pills &amp; badges</h3>
+    <div class="pillrow" style="margin:10px 0 28px">
+      <span class="pill blue">✓ Single focus</span>
+      <span class="pill green">✓ Real terminal</span>
+      <span class="pill orange">● Working</span>
+      <span class="pill gray">○ Idle</span>
+    </div>
+
+    <h3>Radii</h3>
+    <div class="radii">
+      <div class="r"><div style="border-radius:22px"></div><span>card · 22</span></div>
+      <div class="r"><div style="border-radius:16px"></div><span>md · 16</span></div>
+      <div class="r"><div style="border-radius:12px"></div><span>sm · 12</span></div>
+      <div class="r"><div style="border-radius:999px"></div><span>pill · ∞</span></div>
+    </div>
+  </section>
+</div>
+
+<!-- ===================== BRANDING ===================== -->
+<div class="panel" id="branding">
+  <section>
+    <div class="eyebrow">The mark</div>
+    <h2>Branding</h2>
+    <p class="muted" style="margin-bottom:22px">Meet <b>Cowboy</b> — the good boy behind the name, and the face of Dogfood. The logomark is a clean app-icon squircle of Cowboy; the wordmark is lowercase <b>dogfood</b> in SF&nbsp;Pro.</p>
+
+    <div class="brand-grid">
+      <div class="brand-cell" style="background:var(--surface)">
+        <img src="cowboy.svg" width="148" height="148" alt="Cowboy logomark" />
+        <div class="brand-cap">Primary · on light</div>
+      </div>
+      <div class="brand-cell" style="background:var(--ink)">
+        <img src="cowboy-inverse.svg" width="148" height="148" alt="Cowboy logomark, inverse" />
+        <div class="brand-cap" style="color:var(--gray2)">Inverse · on dark</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:32px">Wordmark</h3>
+    <div style="font-size:46px;font-weight:700;letter-spacing:-.03em;margin:6px 0 4px">dogfood</div>
+    <p class="muted">SF Pro (<code>-apple-system</code>) · 700 · lowercase · tracking −0.03em · ink #1C1C1C.</p>
+
+    <h3 style="margin-top:28px">Lockup</h3>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:8px">
+      <img src="cowboy.svg" width="56" height="56" alt="" />
+      <span style="font-size:40px;font-weight:700;letter-spacing:-.03em">dogfood</span>
+    </div>
+    <p class="muted" style="margin-top:10px">Mark height ≈ 1.4× the wordmark's lowercase height. Keep clear space ≥ the mark's corner radius on every side.</p>
+
+    <h3 style="margin-top:30px">Color</h3>
+    <div class="swatches" style="max-width:600px">
+      <div class="sw"><div class="chip2" style="background:#1C1C1C"></div><div class="meta"><b>Ink (mark)</b><span>#1C1C1C</span></div></div>
+      <div class="sw"><div class="chip2" style="background:#FFFFFF;border-bottom:1px solid var(--hairline)"></div><div class="meta"><b>Surface</b><span>#FFFFFF</span></div></div>
+      <div class="sw"><div class="chip2" style="background:#007AFF"></div><div class="meta"><b>Blue</b><span>#007AFF</span></div></div>
+      <div class="sw"><div class="chip2" style="background:#34C759"></div><div class="meta"><b>Green</b><span>#34C759</span></div></div>
+    </div>
+
+    <h3 style="margin-top:14px">Usage</h3>
+    <ul class="brand-do">
+      <li><span class="bd ok"></span><span><b>Primary</b> mark on light surfaces, <b>inverse</b> on dark — both are self-contained.</span></li>
+      <li><span class="bd ok"></span>Keep the squircle corners (medium radius) — they're tuned to sit beside the wordmark.</li>
+      <li><span class="bd no"></span>Don't recolor Cowboy, stretch him, rotate him, or add effects.</li>
+      <li><span class="bd no"></span>Don't put the dark mark on a dark background — reach for the inverse.</li>
+    </ul>
+
+    <h3 style="margin-top:26px">Files</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="dl" href="cowboy.svg" download>cowboy.svg ↓</a>
+      <a class="dl" href="cowboy-inverse.svg" download>cowboy-inverse.svg ↓</a>
+    </div>
+  </section>
+</div>
+
+<!-- ===================== GALLERY ===================== -->
+<div class="panel" id="gallery">
+  <section>
+    <div class="eyebrow">Screens &amp; components</div>
+    <h2>UI Gallery</h2>
+    <p class="muted" style="margin-bottom:16px">Faithful HTML recreations of every screen and component — real CSS, copy freely. <a href="gallery.html" target="_blank" style="color:var(--blue);text-decoration:none;font-weight:600">Open full-page ↗</a></p>
+    <iframe class="galleryframe" src="gallery.html" loading="lazy" title="Dogfood UI Gallery"></iframe>
+  </section>
+</div>
+
+</main>
+
+<div class="footer">Dogfood — interactive docs · generated alongside <code>brainstorming/decisions.md</code> &amp; the vocs site</div>
+
+<script>
+/* ---------------- data ---------------- */
+const COMPONENTS = [
+  // shell / chrome
+  {name:'AppWindow', group:'Shell', scope:'v0', desc:'Rounded window frame, soft shadow, traffic-light inset.'},
+  {name:'TopBar', group:'Shell', scope:'v0', desc:'The header strip: mark · focus title · action icons.'},
+  {name:'AppMark', group:'Shell', scope:'v0', desc:'Dogfood logo + wordmark.'},
+  {name:'StatusDot', group:'Shell', scope:'v0', desc:'CC idle / working / preview-connected indicator.'},
+  {name:'FocusTitle', group:'Shell', scope:'v0', desc:'Center title showing the focus file; click → ⌘P picker.'},
+  {name:'IconButton', group:'Shell', scope:'v0', desc:'Reusable thin-stroke icon button for the top bar.'},
+  {name:'KeyboardShortcuts', group:'Shell', scope:'future', desc:'⌘-cheatsheet overlay.'},
+  {name:'AppThemeToggle', group:'Shell', scope:'future', desc:'Light / dark app theme switch.'},
+  // canvas / preview
+  {name:'Canvas', group:'Canvas', scope:'v0', desc:'The hero area; centered artboard, optional faint grid.'},
+  {name:'PreviewFrame', group:'Canvas', scope:'v0', desc:'iframe/webview rendering the focus component via the wrapper.'},
+  {name:'PreviewEmptyState', group:'Canvas', scope:'v0', desc:'No focus selected yet — invite to pick one.'},
+  {name:'PreviewErrorState', group:'Canvas', scope:'v0', desc:'Compile / runtime error overlay from the preview.'},
+  {name:'ZoomControl', group:'Canvas', scope:'v0', desc:'Bottom-right − 33× + pill.'},
+  {name:'FitButton', group:'Canvas', scope:'v0', desc:'Zoom-to-fit the artboard.'},
+  {name:'BackgroundToggle', group:'Canvas', scope:'v0', desc:'Light / dark / grid canvas background.'},
+  {name:'ResponsiveWidths', group:'Canvas', scope:'future', desc:'Mobile / tablet / desktop width presets.'},
+  {name:'DeviceFrame', group:'Canvas', scope:'future', desc:'Wrap the preview in device chrome.'},
+  {name:'RulerOverlay', group:'Canvas', scope:'future', desc:'Measurement rulers / guides.'},
+  // terminal
+  {name:'TerminalDrawer', group:'Terminal', scope:'v0', desc:'Collapsible drawer that docks beside the canvas.'},
+  {name:'Terminal', group:'Terminal', scope:'v0', desc:'Real xterm + pty shell. Type claude.'},
+  {name:'TerminalStatusPill', group:'Terminal', scope:'v0', desc:'Minimized terminal status — shows when CC is mid-task.'},
+  {name:'DrawerHandle', group:'Terminal', scope:'v0', desc:'Edge grab handle + resize; ⌘J toggle.'},
+  {name:'TerminalTheme', group:'Terminal', scope:'v0', desc:'The pretty xterm color/font theme tokens.'},
+  // project / focus
+  {name:'ProjectPicker', group:'Project', scope:'v0', desc:'Open-folder dialog flow (Cursor model).'},
+  {name:'CommandPalette', group:'Project', scope:'v0', desc:'⌘P fuzzy file open + actions.'},
+  {name:'FuzzyResults', group:'Project', scope:'v0', desc:'Result list inside the palette.'},
+  {name:'FocusSelector', group:'Project', scope:'v0', desc:'Designate the focus component.'},
+  {name:'LaunchScreen', group:'Project', scope:'v0', desc:'No-project-open welcome state.'},
+  {name:'RecentProjects', group:'Project', scope:'future', desc:'Cursor-style recents on launch.'},
+  {name:'ProjectMemory', group:'Project', scope:'future', desc:'Remember last project / focus / wrapper per repo.'},
+  // wrapper
+  {name:'WrapperTemplate', group:'Wrapper', scope:'v0', desc:'The blank per-project preview wrapper scaffold.'},
+  {name:'WrapperEditor', group:'Wrapper', scope:'v0', desc:'Edit the wrapper (imports, providers).'},
+  {name:'WrapperAutoSniff', group:'Wrapper', scope:'future', desc:'Detect Tailwind / globals / providers and pre-fill.'},
+  // future surfaces
+  {name:'CodePeek', group:'Code', scope:'future', desc:'</> view the focus file source inline.'},
+  {name:'PropsPanel', group:'Props', scope:'future', desc:'Controls to flip props / states while looking.'},
+  {name:'VariantGallery', group:'Props', scope:'future', desc:'See all variants/states at once.'},
+  {name:'MotionControls', group:'Motion', scope:'future', desc:'Replay / slow-mo / loop for animation previews.'},
+  {name:'ComponentBoard', group:'Board', scope:'future', desc:'Multi-cell board (preview built as a cell in v0).'},
+  {name:'PreviewCell', group:'Board', scope:'future', desc:'The reusable preview-cell abstraction.'},
+  // design system primitives
+  {name:'Card', group:'Design System', scope:'v0', desc:'Rounded surface — the base container.'},
+  {name:'Pill', group:'Design System', scope:'v0', desc:'Capsule badge (status / label).'},
+  {name:'Timeline', group:'Design System', scope:'v0', desc:'Stop/step timeline with nodes (build/roadmap).'},
+  {name:'Button', group:'Design System', scope:'v0', desc:'Primary / secondary button.'},
+  {name:'Tooltip', group:'Design System', scope:'v0', desc:'Hover hint.'},
+  {name:'Toast', group:'Design System', scope:'future', desc:'Transient notifications.'},
+];
+
+const groupColor = {
+  'Shell':'var(--blue)','Canvas':'var(--green)','Terminal':'var(--ink)','Project':'var(--orange)',
+  'Wrapper':'var(--purple)','Code':'var(--gray)','Props':'var(--purple)','Motion':'var(--pink)',
+  'Board':'var(--gray2)','Design System':'var(--blue)'
+};
+
+const DECISIONS = [
+  {t:'Its own product', b:'Not Crisp, not a yawp mode. The terminal + live-render loop is a strong, specific identity. Crisp <b>documents</b> finished brand marks; Dogfood <b>fabricates</b> working UI code.'},
+  {t:'Single focus, not a board', b:'One component at a time, like a single Figma frame. Suits focused refinement. The preview is built as a <b>cell</b> internally so a board is a later add-on, not a rewrite.'},
+  {t:'Real shell terminal', b:'A true pty (xterm + node-pty). Not a chat pane. Full power, kept visually minimal.'},
+  {t:'Connected to a real project', b:'Open app → choose folder (Cursor model) → CC edits the actual repo. No copy-out step. The piece is born where it belongs.'},
+  {t:'Name: dogfood', b:'Lowercase, self-aware, sits next to yawp and dev-lines. It <b>is</b> the thesis — using your own tools to make your own tools.'},
+  {t:'In-app file picker', b:'Pick the focus component from inside the app. Lean toward a ⌘P command palette over a persistent tree.'},
+  {t:'Preview wrapper: hybrid', b:'v0 ships a blank wrapper you fill once per project. Auto-sniffing (Tailwind / globals / providers) is a later upgrade.'},
+  {t:'Canvas-dominant, terminal as drawer', b:'The canvas is the window; the terminal is a panel you summon. Maximizes looking-at-the-thing.'},
+  {t:'Drawer behavior', b:'Collapsed = a thin <b>status pill</b> showing CC is mid-task. Summon = ⌘J + edge handle. Docks beside the canvas while building so you see CC stream <b>and</b> the render at once.'},
+  {t:'Visual north star', b:'Floating rounded capsules on a calm canvas, soft shadows, hairline borders, near-black icons, active = solid black square. Calm, light, Apple-flavored.'},
+  {t:'The terminal is a REAL terminal', b:'No “Ask” pill abstraction. It’s Terminal.app inside Dogfood — type <b>claude</b> to start CC. Styled to match the system: rounded, soft shadow, good monospace.'},
+  {t:'No left toolbar in v0', b:'Dogfood has no drawing tools, so there’s no left toolbar in v0. View controls ride in the top bar / by the zoom pill.'},
+];
+
+const SWATCHES = [
+  ['Blue','#007AFF'],['Blue bg','#E9F2FF'],['Green','#34C759'],['Green bg','#E6F8EC'],
+  ['Pink','#FF6482'],['Orange','#FF9500'],['Ink','#1C1C1E'],['Gray','#8E8E93'],
+  ['Hairline','#E5E5EA'],['Card','#F2F2F7'],['Page','#F5F5F7'],['Surface','#FFFFFF'],
+];
+
+/* ---------------- render ---------------- */
+const $ = s => document.querySelector(s);
+const grid = $('#grid');
+const LS_KEY = 'dogfood-built:' + location.pathname.replace(/\/+$/,'');
+let builtSet = new Set();
+try{ builtSet = new Set(JSON.parse(localStorage.getItem(LS_KEY)||'[]')); }catch(e){}
+let scope='all', group='all', query='';
+
+// group chips
+const groups = [...new Set(COMPONENTS.map(c=>c.group))];
+const gc = $('#groupchips');
+gc.innerHTML = '<button class="chip active" data-g="all">All areas</button>' +
+  groups.map(g=>`<button class="chip" data-g="${g}">${g}</button>`).join('');
+
+function save(){ try{ localStorage.setItem(LS_KEY,JSON.stringify([...builtSet])); }catch(e){} }
+
+function renderGrid(){
+  const items = COMPONENTS.filter(c=>
+    (scope==='all'||c.scope===scope) &&
+    (group==='all'||c.group===group) &&
+    (!query || (c.name+' '+c.desc).toLowerCase().includes(query))
+  );
+  grid.innerHTML = items.map(c=>`
+    <div class="comp ${builtSet.has(c.name)?'built':''}" data-n="${c.name}">
+      <div class="chead">
+        <div class="cname"><span class="dot" style="background:${groupColor[c.group]}"></span>${c.name}</div>
+        <span class="tag ${c.scope}">${c.scope}</span>
+      </div>
+      <div class="cdesc">${c.desc}</div>
+      <div class="cfoot">
+        <span class="check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="group">${c.group}</span>
+      </div>
+    </div>`).join('') || '<p class="muted">No components match.</p>';
+  updateProgress();
+}
+function updateProgress(){
+  const v0 = COMPONENTS.filter(c=>c.scope==='v0');
+  const done = v0.filter(c=>builtSet.has(c.name)).length;
+  $('#ptext').textContent = `${done} / ${v0.length} v0 components built · ${COMPONENTS.length} total`;
+  $('#pbar').style.width = (done/v0.length*100)+'%';
+}
+grid.addEventListener('click', e=>{
+  const card = e.target.closest('.comp'); if(!card) return;
+  const n = card.dataset.n;
+  builtSet.has(n) ? builtSet.delete(n) : builtSet.add(n);
+  card.classList.toggle('built'); save(); updateProgress();
+});
+$('#scopechips').addEventListener('click', e=>{
+  const b=e.target.closest('.chip'); if(!b)return;
+  scope=b.dataset.scope; [...e.currentTarget.children].forEach(c=>c.classList.toggle('active',c===b)); renderGrid();
+});
+gc.addEventListener('click', e=>{
+  const b=e.target.closest('.chip'); if(!b)return;
+  group=b.dataset.g; [...gc.children].forEach(c=>c.classList.toggle('active',c===b)); renderGrid();
+});
+$('#csearch').addEventListener('input', e=>{ query=e.target.value.toLowerCase().trim(); renderGrid(); });
+
+// decisions
+$('#acclist').innerHTML = DECISIONS.map((d,i)=>`
+  <details class="acc">
+    <summary><span class="num">${i+1}</span>${d.t}<span class="chev"><svg width="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></summary>
+    <div class="body">${d.b}</div>
+  </details>`).join('');
+
+// swatches
+$('#swatches').innerHTML = SWATCHES.map(([n,hex])=>`
+  <div class="sw"><div class="chip2" style="background:${hex};${hex==='#FFFFFF'?'border-bottom:1px solid var(--hairline)':''}"></div>
+  <div class="meta"><b>${n}</b><span>${hex}</span></div></div>`).join('');
+
+// tabs
+$('#tabs').addEventListener('click', e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  const t=b.dataset.tab;
+  [...$('#tabs').children].forEach(x=>x.classList.toggle('active',x===b));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===t));
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+// ---- version switcher ----
+// Newest first. "Latest" is the living top of main; vN are frozen snapshots.
+const BASE = '/dogfood/';
+const VERSIONS = [
+  {id:'latest', label:'Latest', path:BASE,        date:'living'},
+  {id:'v0',     label:'v0',     path:BASE+'v0/',  date:'2026-06-02'},
+];
+(function(){
+  const here = location.pathname.replace(/\/+$/,'') + '/';
+  const cur = VERSIONS.find(v=>v.path===here) || VERSIONS[0];
+  document.getElementById('verlabel').textContent = cur.label;
+  document.getElementById('vmenu').innerHTML =
+    '<div class="vhead">Versions · watch progress</div>' +
+    VERSIONS.map(v=>`<a class="${v.id===cur.id?'cur':''}" href="${v.path}">${v.label}<span class="d">${v.date}</span></a>`).join('');
+  const sw = document.getElementById('vswitch');
+  document.getElementById('verbtn').addEventListener('click',e=>{e.stopPropagation();sw.classList.toggle('open');});
+  document.addEventListener('click',()=>sw.classList.remove('open'));
+})();
+
+renderGrid();
+</script>
+</body>
+</html>
