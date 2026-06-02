@@ -423,12 +423,9 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; col
 .cc-cd { display:grid; place-items:center; color:var(--mut); }
 .cc-cd svg { width:13px; height:13px; }
 
-/* terminal content */
-.cc-term { flex:1; min-height:0; padding:10px 18px; font-family:var(--mono); font-size:13.5px; color:var(--fg); }
-.cc-term-line { display:flex; align-items:center; gap:11px; }
-.cc-dot { width:9px; height:9px; border:1.5px solid var(--mut); border-radius:50%; flex:none; }
-.cc-prompt { color:var(--mut); }
-.cc-cursor { width:8px; height:17px; background:var(--fg); margin:7px 0 0 20px; }
+/* terminal content — hosts the live xterm session */
+.cc-term { flex:1; min-height:0; display:flex; padding:4px 8px; }
+.cc-term .term-wrap { flex:1; min-width:0; padding:0; }
 .cc-readonly { text-align:center; color:var(--dim); font-size:13px; padding:0 0 12px; }
 
 /* status bar */

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import Terminal from './Terminal'
 import cowboyDark from './assets/cowboy.svg'
 import cowboyLight from './assets/cowboy-inverse.svg'
 
@@ -103,28 +104,23 @@ export default function CursorClone(): JSX.Element {
           </div>
         </div>
 
-        {!collapsed && (
-          <div className="cc-panel" style={{ width: panelW }}>
-            <div className="cc-panel-resize" onMouseDown={startResize} />
-            <div className="cc-panel-head">
-              <div className="cc-tabs">
-                {tabs.map((t) => (
-                  <span key={t} className={`cc-tab ${t === 'Terminal' ? 'on' : ''}`}>{t}</span>
-                ))}
-              </div>
-              <div className="cc-panel-ctrls">
-                <button className="cc-ic cc-toggle" title="Hide terminal" onClick={() => setCollapsed(true)}>{ChevDown}</button>
-              </div>
+        {/* Panel stays mounted when hidden so the live terminal session survives a toggle. */}
+        <div className="cc-panel" style={{ width: panelW, display: collapsed ? 'none' : 'flex' }}>
+          <div className="cc-panel-resize" onMouseDown={startResize} />
+          <div className="cc-panel-head">
+            <div className="cc-tabs">
+              {tabs.map((t) => (
+                <span key={t} className={`cc-tab ${t === 'Terminal' ? 'on' : ''}`}>{t}</span>
+              ))}
             </div>
-            <div className="cc-term">
-              <div className="cc-term-line">
-                <span className="cc-dot" />
-                <span><span className="cc-prompt">$</span> npx tsc --noEmit 2&gt;&amp;1</span>
-              </div>
-              <div className="cc-cursor" />
+            <div className="cc-panel-ctrls">
+              <button className="cc-ic cc-toggle" title="Hide terminal" onClick={() => setCollapsed(true)}>{ChevDown}</button>
             </div>
           </div>
-        )}
+          <div className="cc-term">
+            <Terminal id="main" theme={theme} />
+          </div>
+        </div>
       </div>
 
       {/* status bar */}
