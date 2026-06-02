@@ -27,7 +27,7 @@ try {
 }
 
 let win: BrowserWindow | null = null
-let ptyProc: import('node-pty').IPty | null = null
+const ptys = new Map<string, import('node-pty').IPty>()
 let projectDir: string = app.getPath('home')
 
 function createWindow(): void {
@@ -159,37 +159,41 @@ ipcMain.handle('activity:list', async () => {
 /* Real terminal (node-pty)                                            */
 /* ------------------------------------------------------------------ */
 
-ipcMain.handle('pty:start', (e, opts: { cols?: number; rows?: number }) => {
+ipcMain.handle('pty:start', (e, { id, cols, rows }: { id: string; cols?: number; rows?: number }) => {
   if (!pty) {
-    e.sender.send('pty:data', '\r\n\x1b[33m[dogfood] terminal backend unavailable — run `npm run rebuild`\x1b[0m\r\n')
+    e.sender.send('pty:data', { id, data: '\r\n\x1b[33m[dogfood] terminal backend unavailable — run `npm run rebuild`\x1b[0m\r\n' })
     return false
   }
-  if (ptyProc) {
-    try { ptyProc.kill() } catch { /* noop */ }
-    ptyProc = null
-  }
+  const existing = ptys.get(id)
+  if (existing) { try { existing.kill() } catch { /* noop */ } ptys.delete(id) }
   const shellPath = process.env.SHELL || '/bin/zsh'
-  ptyProc = pty.spawn(shellPath, [], {
+  const proc = pty.spawn(shellPath, [], {
     name: 'xterm-256color',
-    cols: opts?.cols || 80,
-    rows: opts?.rows || 24,
+    cols: cols || 80,
+    rows: rows || 24,
     cwd: projectDir,
     env: { ...process.env, TERM: 'xterm-256color' } as { [key: string]: string }
   })
-  ptyProc.onData((d) => win?.webContents.send('pty:data', d))
-  ptyProc.onExit(() => {
-    win?.webContents.send('pty:exit')
-    ptyProc = null
+  proc.onData((d) => win?.webContents.send('pty:data', { id, data: d }))
+  proc.onExit(() => {
+    win?.webContents.send('pty:exit', { id })
+    ptys.delete(id)
   })
+  ptys.set(id, proc)
   return true
 })
 
-ipcMain.on('pty:write', (_e, data: string) => {
-  ptyProc?.write(data)
+ipcMain.on('pty:write', (_e, { id, data }: { id: string; data: string }) => {
+  ptys.get(id)?.write(data)
 })
 
-ipcMain.on('pty:resize', (_e, { cols, rows }: { cols: number; rows: number }) => {
-  try { ptyProc?.resize(cols, rows) } catch { /* noop */ }
+ipcMain.on('pty:resize', (_e, { id, cols, rows }: { id: string; cols: number; rows: number }) => {
+  try { ptys.get(id)?.resize(cols, rows) } catch { /* noop */ }
+})
+
+ipcMain.on('pty:kill', (_e, { id }: { id: string }) => {
+  const proc = ptys.get(id)
+  if (proc) { try { proc.kill() } catch { /* noop */ } ptys.delete(id) }
 })
 
 ipcMain.handle('shell:reveal', (_e, p: string) => {

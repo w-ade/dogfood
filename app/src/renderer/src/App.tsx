@@ -31,8 +31,7 @@ const base = (p: string): string => p.split('/').pop() || p
 
 export default function App(): JSX.Element {
   const [project, setProject] = useState<Project | null>(null)
-  const [tabs, setTabs] = useState<string[]>(['Button.tsx', 'Card.tsx'])
-  const [active, setActive] = useState<string | null>('Button.tsx')
+  const [focus, setFocus] = useState<string | null>(null)
   const [components, setComponents] = useState<string[]>([])
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [activityOpen, setActivityOpen] = useState(false)
@@ -127,8 +126,7 @@ export default function App(): JSX.Element {
     const p = await window.dogfood.openProject()
     if (!p) return
     setProject(p)
-    setTabs([])
-    setActive(null)
+    setFocus(null)
     setComponents([])
     refreshActivity()
   }, [refreshActivity])
@@ -137,18 +135,6 @@ export default function App(): JSX.Element {
     setPaletteOpen(true)
     if (!components.length) setComponents(await window.dogfood.listComponents())
   }, [components.length])
-
-  const openTab = (t: string): void => {
-    setTabs((cur) => (cur.includes(t) ? cur : [...cur, t]))
-    setActive(t)
-  }
-  const closeTab = (t: string): void => {
-    setTabs((cur) => {
-      const next = cur.filter((x) => x !== t)
-      setActive((a) => (a === t ? next[next.length - 1] ?? null : a))
-      return next
-    })
-  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -182,20 +168,6 @@ export default function App(): JSX.Element {
           <button className="cbtn" title="Toggle light / dark" onClick={toggleTheme}>{theme === 'dark' ? I.sun : I.moon}</button>
           <button className="cbtn" title="Settings">{I.gear}</button>
         </div>
-      </div>
-
-      {/* ---------- tab bar (Cursor-style) ---------- */}
-      <div className="tabbar">
-        <div className="etabs">
-          {tabs.map((t) => (
-            <div key={t} className={`etab ${t === active ? 'on' : ''}`} onClick={() => setActive(t)}>
-              <span className="etab-name">{base(t)}</span>
-              <button className="etab-x" title="Close" onClick={(e) => { e.stopPropagation(); closeTab(t) }}>{I.close}</button>
-            </div>
-          ))}
-          <button className="etab-add" title="Open component (⌘P)" onClick={openPalette}>{I.plus}</button>
-        </div>
-        <button className="etab-more" title="More">{I.more}</button>
       </div>
 
       {/* ---------- body ---------- */}
@@ -251,14 +223,14 @@ export default function App(): JSX.Element {
 
       {/* ---------- dialkit panel — terminal + dials ---------- */}
       {termEverOpened.current && (
-        <DialPanel open={terminalOpen} projectKey={project?.path || 'home'} theme={theme} />
+        <DialPanel open={terminalOpen} theme={theme} />
       )}
 
       {/* ---------- command palette ---------- */}
       {paletteOpen && (
         <CommandPalette
           components={components}
-          onPick={(f) => { openTab(f); setPaletteOpen(false) }}
+          onPick={(f) => { setFocus(f); setPaletteOpen(false) }}
           onClose={() => setPaletteOpen(false)}
         />
       )}

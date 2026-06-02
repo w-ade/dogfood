@@ -2,8 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Terminal as Xterm, type ITheme } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 
-// xterm theme per app theme. Background is transparent so the glass/surface
-// behind the shelf shows through; only the text color flips.
+// xterm theme per app theme. Background transparent so the glass shows through.
 function xtermTheme(theme: 'light' | 'dark'): ITheme {
   const dark = theme === 'dark'
   return {
@@ -19,13 +18,12 @@ function xtermTheme(theme: 'light' | 'dark'): ITheme {
   }
 }
 
-// A real terminal: xterm in the renderer, a node-pty shell in main.
-// Type `claude` to start Claude Code, or anything else — it's a real shell.
+// One real terminal session, keyed by `id` (each tab is a separate pty).
 export default function Terminal({
-  projectKey,
+  id,
   theme
 }: {
-  projectKey: string
+  id: string
   theme: 'light' | 'dark'
 }): JSX.Element {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -58,29 +56,28 @@ export default function Terminal({
     let disposed = false
     const api = window.dogfood
 
-    api.pty.start({ cols: term.cols, rows: term.rows }).then(() => {
+    api.pty.start(id, { cols: term.cols, rows: term.rows }).then(() => {
       if (disposed) return
-      api.pty.resize(term.cols, term.rows)
+      api.pty.resize(id, term.cols, term.rows)
     })
 
-    const offData = api.pty.onData((d) => term.write(d))
-    const offExit = api.pty.onExit(() => term.write('\r\n\x1b[90m[process exited]\x1b[0m\r\n'))
-    term.onData((d) => api.pty.write(d))
+    const offData = api.pty.onData((tid, d) => { if (tid === id) term.write(d) })
+    const offExit = api.pty.onExit((tid) => { if (tid === id) term.write('\r\n\x1b[90m[process exited]\x1b[0m\r\n') })
+    term.onData((d) => api.pty.write(id, d))
 
     const onResize = (): void => {
       safeFit()
-      api.pty.resize(term.cols, term.rows)
+      api.pty.resize(id, term.cols, term.rows)
     }
     const ro = new ResizeObserver(onResize)
     ro.observe(hostRef.current)
     window.addEventListener('resize', onResize)
 
-    // remeasure once Geist Mono actually loads (canvas font metrics)
     if (document.fonts?.ready) {
       document.fonts.ready.then(() => {
         if (disposed) return
         safeFit()
-        api.pty.resize(term.cols, term.rows)
+        api.pty.resize(id, term.cols, term.rows)
       })
     }
 
@@ -92,12 +89,13 @@ export default function Terminal({
       offExit()
       ro.disconnect()
       window.removeEventListener('resize', onResize)
+      api.pty.kill(id)
       term.dispose()
       termRef.current = null
     }
-  }, [projectKey])
+  }, [id])
 
-  // live-swap the theme without losing the session
+  // live-swap theme without losing the session
   useEffect(() => {
     if (termRef.current) termRef.current.options.theme = xtermTheme(theme)
   }, [theme])

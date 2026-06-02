@@ -10,11 +10,12 @@ interface Window {
       get: () => Promise<boolean>
     }
     pty: {
-      start: (opts: { cols?: number; rows?: number }) => Promise<boolean>
-      write: (d: string) => void
-      resize: (cols: number, rows: number) => void
-      onData: (cb: (d: string) => void) => () => void
-      onExit: (cb: () => void) => () => void
+      start: (id: string, opts: { cols?: number; rows?: number }) => Promise<boolean>
+      write: (id: string, d: string) => void
+      resize: (id: string, cols: number, rows: number) => void
+      kill: (id: string) => void
+      onData: (cb: (id: string, d: string) => void) => () => void
+      onExit: (cb: (id: string) => void) => () => void
     }
   }
 }

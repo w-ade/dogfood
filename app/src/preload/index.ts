@@ -13,16 +13,17 @@ const api = {
     get: () => ipcRenderer.invoke('theme:get') as Promise<boolean>
   },
   pty: {
-    start: (opts: { cols?: number; rows?: number }) => ipcRenderer.invoke('pty:start', opts) as Promise<boolean>,
-    write: (d: string) => ipcRenderer.send('pty:write', d),
-    resize: (cols: number, rows: number) => ipcRenderer.send('pty:resize', { cols, rows }),
-    onData: (cb: (d: string) => void) => {
-      const h = (_e: unknown, d: string): void => cb(d)
+    start: (id: string, opts: { cols?: number; rows?: number }) => ipcRenderer.invoke('pty:start', { id, ...opts }) as Promise<boolean>,
+    write: (id: string, d: string) => ipcRenderer.send('pty:write', { id, data: d }),
+    resize: (id: string, cols: number, rows: number) => ipcRenderer.send('pty:resize', { id, cols, rows }),
+    kill: (id: string) => ipcRenderer.send('pty:kill', { id }),
+    onData: (cb: (id: string, d: string) => void) => {
+      const h = (_e: unknown, p: { id: string; data: string }): void => cb(p.id, p.data)
       ipcRenderer.on('pty:data', h)
       return () => ipcRenderer.removeListener('pty:data', h)
     },
-    onExit: (cb: () => void) => {
-      const h = (): void => cb()
+    onExit: (cb: (id: string) => void) => {
+      const h = (_e: unknown, p: { id: string }): void => cb(p.id)
       ipcRenderer.on('pty:exit', h)
       return () => ipcRenderer.removeListener('pty:exit', h)
     }
