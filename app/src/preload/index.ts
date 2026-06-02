@@ -12,6 +12,25 @@ const api = {
     set: (mode: 'light' | 'dark' | 'system') => ipcRenderer.invoke('theme:set', mode) as Promise<boolean>,
     get: () => ipcRenderer.invoke('theme:get') as Promise<boolean>
   },
+  debug: {
+    // app side: push a line into the stream
+    emit: (level: string, source: string, msg: string) =>
+      ipcRenderer.send('debug:emit', { level, source, msg }),
+    // debug window: replay buffer + subscribe
+    ready: () => ipcRenderer.send('debug:ready'),
+    clear: () => ipcRenderer.send('debug:clear'),
+    toggle: () => ipcRenderer.send('debug:toggle'),
+    onLine: (cb: (e: { t: number; level: string; source: string; msg: string }) => void) => {
+      const h = (_e: unknown, entry: { t: number; level: string; source: string; msg: string }): void => cb(entry)
+      ipcRenderer.on('debug:line', h)
+      return () => ipcRenderer.removeListener('debug:line', h)
+    },
+    onCleared: (cb: () => void) => {
+      const h = (): void => cb()
+      ipcRenderer.on('debug:cleared', h)
+      return () => ipcRenderer.removeListener('debug:cleared', h)
+    }
+  },
   pty: {
     start: (id: string, opts: { cols?: number; rows?: number }) => ipcRenderer.invoke('pty:start', { id, ...opts }) as Promise<boolean>,
     write: (id: string, d: string) => ipcRenderer.send('pty:write', { id, data: d }),

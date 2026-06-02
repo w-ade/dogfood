@@ -1,0 +1,118 @@
+/* Dogfood debug console — clean docs aesthetic (light, SF Pro chrome,
+   Geist Mono rows). Mirrors index.html / gallery.html tokens. */
+:root {
+  --ink: #272727;
+  --soft: #3a3a3c;
+  --label: #9a9a9a;
+  --faint: #b6b6b6;
+  --line: #ececec;
+  --chip: #f4f4f5;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #dbg { height: 100%; }
+body {
+  font-family: var(--font);
+  color: var(--ink);
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -.011em;
+  overflow: hidden;
+}
+#dbg { display: flex; flex-direction: column; }
+
+/* ---- title / tools bar ---- */
+.dbg-bar {
+  flex: none;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px 0 80px; /* leave room for traffic lights */
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+.dbg-drag {
+  position: absolute;
+  inset: 0;
+  -webkit-app-region: drag;
+}
+.dbg-bar > *:not(.dbg-drag) { position: relative; z-index: 1; -webkit-app-region: no-drag; }
+.dbg-name { font-weight: 600; font-size: 13px; letter-spacing: -.02em; }
+.dbg-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #34c759; box-shadow: 0 0 0 3px rgba(52,199,89,.16);
+}
+.dbg-dot.off { background: var(--faint); box-shadow: none; }
+.dbg-live { font-size: 11px; color: var(--label); letter-spacing: .02em; }
+
+.dbg-tools { margin-left: auto; display: flex; align-items: center; gap: 7px; }
+.dbg-select { position: relative; display: flex; align-items: center; }
+.dbg-select svg {
+  position: absolute; right: 7px; width: 14px; height: 14px;
+  color: var(--label); pointer-events: none;
+}
+.dbg-select select {
+  appearance: none; -webkit-appearance: none;
+  font-family: var(--font); font-size: 12px; color: var(--soft);
+  background: var(--chip); border: 1px solid var(--line); border-radius: 7px;
+  padding: 5px 26px 5px 9px; cursor: pointer; text-transform: capitalize;
+}
+.dbg-tools input {
+  font-family: var(--font); font-size: 12px; color: var(--ink);
+  background: var(--chip); border: 1px solid var(--line); border-radius: 7px;
+  padding: 5px 9px; width: 130px; outline: none;
+}
+.dbg-tools input:focus { border-color: #d6d6d6; }
+.dbg-tools input::placeholder { color: var(--faint); }
+.dbg-btn {
+  font-family: var(--font); font-size: 12px; color: var(--soft);
+  background: var(--chip); border: 1px solid var(--line); border-radius: 7px;
+  padding: 5px 11px; cursor: pointer;
+}
+.dbg-btn:hover { color: var(--ink); border-color: #d6d6d6; }
+.dbg-btn.on { color: #fff; background: var(--ink); border-color: var(--ink); }
+
+/* ---- log ---- */
+.dbg-log {
+  flex: 1; min-height: 0; overflow-y: auto;
+  padding: 6px 0;
+  font-family: var(--mono); font-size: 12px; line-height: 1.55;
+}
+.dbg-row {
+  display: grid;
+  grid-template-columns: 92px 78px 1fr;
+  gap: 12px;
+  padding: 2px 16px;
+  align-items: baseline;
+}
+.dbg-row:hover { background: #fafafa; }
+.dbg-time { color: var(--faint); font-size: 11px; white-space: nowrap; }
+.dbg-src {
+  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--label); justify-self: start; align-self: center;
+  padding: 1px 7px; border-radius: 5px; background: var(--chip);
+}
+.src-main { color: #007aff; background: rgba(0,122,255,.10); }
+.src-renderer { color: #34c759; background: rgba(52,199,89,.12); }
+.src-pty { color: #af52de; background: rgba(175,82,222,.12); }
+.src-build { color: #ff9500; background: rgba(255,149,0,.13); }
+.src-system { color: #8c8c8c; background: var(--chip); }
+.dbg-msg { color: var(--soft); white-space: pre-wrap; word-break: break-word; }
+.lvl-warn .dbg-msg { color: #b25e00; }
+.lvl-error .dbg-msg { color: #c4314b; }
+.lvl-error { background: rgba(196,49,75,.04); }
+
+/* ---- footer ---- */
+.dbg-foot {
+  flex: none; height: 30px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 16px;
+  border-top: 1px solid var(--line);
+  font-size: 11px; color: var(--label);
+}
+.dbg-spacer { flex: 1; }
+.dbg-auto { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+.dbg-auto input { accent-color: var(--ink); }

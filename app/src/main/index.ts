@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell, nativeImage, nativeTheme } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, shell, nativeImage, nativeTheme, globalShortcut } from 'electron'
 import { join, basename } from 'path'
 import { readdirSync, readFileSync, writeFileSync } from 'fs'
 import { execSync } from 'child_process'
@@ -30,6 +30,72 @@ let win: BrowserWindow | null = null
 const ptys = new Map<string, import('node-pty').IPty>()
 let projectDir: string = app.getPath('home')
 
+/* ------------------------------------------------------------------ */
+/* Debug stream — feeds the standalone debug-logger window.            */
+/* Captures both app runtime events (main/renderer/pty) and the        */
+/* dev/build stream (Vite HMR + errors, forwarded from the renderer).  */
+/* ------------------------------------------------------------------ */
+
+type DebugEntry = { t: number; level: string; source: string; msg: string }
+const debugBuf: DebugEntry[] = []
+const DEBUG_MAX = 5000
+let debugWin: BrowserWindow | null = null
+
+function fmtArg(a: unknown): string {
+  if (typeof a === 'string') return a
+  if (a instanceof Error) return a.stack || a.message
+  try { return JSON.stringify(a) } catch { return String(a) }
+}
+
+function dlog(level: string, source: string, msg: string): void {
+  const entry: DebugEntry = { t: Date.now(), level, source, msg }
+  debugBuf.push(entry)
+  if (debugBuf.length > DEBUG_MAX) debugBuf.splice(0, debugBuf.length - DEBUG_MAX)
+  if (debugWin && !debugWin.isDestroyed()) debugWin.webContents.send('debug:line', entry)
+}
+
+// Mirror main-process console output into the stream.
+;(['log', 'info', 'warn', 'error'] as const).forEach((m) => {
+  const orig = console[m].bind(console)
+  console[m] = (...args: unknown[]): void => {
+    orig(...args)
+    dlog(m === 'log' ? 'log' : m, 'main', args.map(fmtArg).join(' '))
+  }
+})
+
+process.on('uncaughtException', (err) => dlog('error', 'main', `uncaughtException: ${err.stack || err}`))
+process.on('unhandledRejection', (reason) => dlog('error', 'main', `unhandledRejection: ${fmtArg(reason)}`))
+
+function createDebugWindow(): void {
+  if (debugWin && !debugWin.isDestroyed()) { debugWin.show(); debugWin.focus(); return }
+  debugWin = new BrowserWindow({
+    width: 580,
+    height: 720,
+    show: false,
+    title: 'Dogfood — Debug',
+    titleBarStyle: 'hiddenInset',
+    trafficLightPosition: { x: 13, y: 16 },
+    backgroundColor: '#ffffff',
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
+  })
+  debugWin.on('ready-to-show', () => debugWin?.show())
+  debugWin.on('closed', () => { debugWin = null })
+  if (process.env['ELECTRON_RENDERER_URL']) {
+    debugWin.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/debug.html`)
+  } else {
+    debugWin.loadFile(join(__dirname, '../renderer/debug.html'))
+  }
+  dlog('system', 'system', 'debug window opened')
+}
+
+function toggleDebugWindow(): void {
+  if (debugWin && !debugWin.isDestroyed()) debugWin.close()
+  else createDebugWindow()
+}
+
 function createWindow(): void {
   const saved = loadWinState()
   win = new BrowserWindow({
@@ -51,7 +117,7 @@ function createWindow(): void {
     }
   })
 
-  win.on('ready-to-show', () => win?.show())
+  win.on('ready-to-show', () => { win?.show(); dlog('system', 'system', 'main window ready') })
 
   // remember size/position (debounced) and on close
   let t: ReturnType<typeof setTimeout>
@@ -76,10 +142,15 @@ app.whenReady().then(() => {
     } catch { /* noop */ }
   }
   createWindow()
+  createDebugWindow()
+  // ⌥⌘D toggles the debug logger from anywhere.
+  globalShortcut.register('Alt+Command+D', toggleDebugWindow)
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
+
+app.on('will-quit', () => globalShortcut.unregisterAll())
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
@@ -94,6 +165,7 @@ ipcMain.handle('dialog:openProject', async () => {
   const r = await dialog.showOpenDialog(win, { properties: ['openDirectory'] })
   if (r.canceled || !r.filePaths[0]) return null
   projectDir = r.filePaths[0]
+  dlog('info', 'main', `project opened: ${projectDir}`)
   return { path: projectDir, name: basename(projectDir) }
 })
 
@@ -175,11 +247,13 @@ ipcMain.handle('pty:start', (e, { id, cols, rows }: { id: string; cols?: number;
     env: { ...process.env, TERM: 'xterm-256color' } as { [key: string]: string }
   })
   proc.onData((d) => win?.webContents.send('pty:data', { id, data: d }))
-  proc.onExit(() => {
+  proc.onExit(({ exitCode }) => {
     win?.webContents.send('pty:exit', { id })
     ptys.delete(id)
+    dlog('info', 'pty', `exit ${id} (code ${exitCode})`)
   })
   ptys.set(id, proc)
+  dlog('info', 'pty', `start ${id} — ${shellPath} @ ${projectDir}`)
   return true
 })
 
@@ -206,6 +280,7 @@ ipcMain.handle('shell:reveal', (_e, p: string) => {
 
 ipcMain.handle('theme:set', (_e, mode: 'light' | 'dark' | 'system') => {
   nativeTheme.themeSource = mode
+  dlog('info', 'main', `theme → ${mode}`)
   // re-apply vibrancy so its tint re-evaluates against the new appearance
   if (win && process.platform === 'darwin') {
     win.setVibrancy(null)
@@ -215,3 +290,24 @@ ipcMain.handle('theme:set', (_e, mode: 'light' | 'dark' | 'system') => {
 })
 
 ipcMain.handle('theme:get', () => nativeTheme.shouldUseDarkColors)
+
+/* ------------------------------------------------------------------ */
+/* Debug logger IPC                                                    */
+/* ------------------------------------------------------------------ */
+
+// Renderer-side events (console, window errors, Vite HMR) arrive here.
+ipcMain.on('debug:emit', (_e, { level, source, msg }: { level?: string; source?: string; msg?: string }) => {
+  dlog(level || 'log', source || 'renderer', String(msg ?? ''))
+})
+
+// Debug window finished loading — replay the buffered history into it.
+ipcMain.on('debug:ready', (e) => {
+  for (const entry of debugBuf) e.sender.send('debug:line', entry)
+})
+
+ipcMain.on('debug:clear', () => {
+  debugBuf.length = 0
+  if (debugWin && !debugWin.isDestroyed()) debugWin.webContents.send('debug:cleared')
+})
+
+ipcMain.on('debug:toggle', () => toggleDebugWindow())

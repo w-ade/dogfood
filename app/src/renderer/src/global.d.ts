@@ -9,6 +9,14 @@ interface Window {
       set: (mode: 'light' | 'dark' | 'system') => Promise<boolean>
       get: () => Promise<boolean>
     }
+    debug: {
+      emit: (level: string, source: string, msg: string) => void
+      ready: () => void
+      clear: () => void
+      toggle: () => void
+      onLine: (cb: (e: { t: number; level: string; source: string; msg: string }) => void) => () => void
+      onCleared: (cb: () => void) => () => void
+    }
     pty: {
       start: (id: string, opts: { cols?: number; rows?: number }) => Promise<boolean>
       write: (id: string, d: string) => void

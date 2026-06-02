@@ -13,6 +13,14 @@ export default defineConfig({
     resolve: {
       alias: { '@': resolve('src/renderer/src') }
     },
-    plugins: [react()]
+    plugins: [react()],
+    build: {
+      rollupOptions: {
+        input: {
+          index: resolve('src/renderer/index.html'),
+          debug: resolve('src/renderer/debug.html')
+        }
+      }
+    }
   }
 })
