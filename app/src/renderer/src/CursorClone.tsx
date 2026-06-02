@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import cowboyDark from './assets/cowboy.svg'
 import cowboyLight from './assets/cowboy-inverse.svg'
 
@@ -42,6 +42,28 @@ export default function CursorClone(): JSX.Element {
       return n
     })
 
+  const [panelH, setPanelH] = useState(280)
+  const resizing = useRef(false)
+  const startResize = (e: React.MouseEvent): void => {
+    e.preventDefault()
+    resizing.current = true
+    const sy = e.clientY
+    const sh = panelH
+    document.body.style.cursor = 'ns-resize'
+    const onMove = (ev: MouseEvent): void => {
+      if (!resizing.current) return
+      setPanelH(Math.min(Math.max(120, sh + (sy - ev.clientY)), window.innerHeight - 160))
+    }
+    const onUp = (): void => {
+      resizing.current = false
+      document.body.style.cursor = ''
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }
+
   return (
     <div className={`cc cc-${theme}`}>
       {/* title bar */}
@@ -72,7 +94,8 @@ export default function CursorClone(): JSX.Element {
       </div>
 
       {/* bottom panel */}
-      <div className="cc-panel">
+      <div className="cc-panel" style={{ height: panelH }}>
+        <div className="cc-panel-resize" onMouseDown={startResize} />
         <div className="cc-panel-head">
           <div className="cc-tabs">
             {tabs.map((t) => (

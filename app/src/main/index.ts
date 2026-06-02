@@ -41,7 +41,7 @@ function createWindow(): void {
     minHeight: 580,
     show: false,
     titleBarStyle: 'hiddenInset',
-    trafficLightPosition: { x: 18, y: 22 },
+    trafficLightPosition: { x: 14, y: 11 },
     backgroundColor: '#00000000',
     vibrancy: 'under-window',
     visualEffectState: 'active',
