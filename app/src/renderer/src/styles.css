@@ -21,7 +21,7 @@ html, body, #root { height: 100%; }
 body {
   font-family: var(--font);
   color: var(--ink);
-  background: var(--page);
+  background: transparent;
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.01em;
   overflow: hidden;
@@ -73,7 +73,7 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; col
   display: grid; place-items: center;
   background:
     radial-gradient(circle at 1px 1px, var(--hairline) 1px, transparent 0) 0 0 / 22px 22px,
-    var(--page);
+    rgba(250,250,252,.3);
   overflow: hidden;
 }
 .canvas.bg-plain { background: var(--page); }
@@ -260,5 +260,23 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; col
 :root[data-theme="dark"] .canvas {
   background:
     radial-gradient(circle at 1px 1px, rgba(255,255,255,.07) 1px, transparent 0) 0 0 / 22px 22px,
-    rgba(16,16,20,.5);
+    rgba(14,14,18,.16);
 }
+
+/* ---------------- dialkit panel — slides in from the right like a shelf ---------------- */
+.dialpanel {
+  position: fixed; top: 53px; right: 0; bottom: 0; width: 360px; z-index: 40;
+  display: flex; flex-direction: column; gap: 10px;
+  overflow-y: auto; padding: 14px;
+  background: var(--surface);
+  border-left: 1px solid var(--hairline);
+  box-shadow: -10px 0 30px rgba(0,0,0,.08);
+  -webkit-backdrop-filter: saturate(180%) blur(26px);
+  backdrop-filter: saturate(180%) blur(26px);
+  transform: translateX(100%);
+  transition: transform .28s cubic-bezier(.32, .72, 0, 1);
+  will-change: transform;
+}
+.dialpanel.open { transform: translateX(0); }
+.dialpanel-term { height: 320px; }
+.dialpanel-term .term-wrap { height: 100%; }
