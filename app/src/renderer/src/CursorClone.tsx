@@ -42,7 +42,11 @@ export default function CursorClone(): JSX.Element {
     })
 
   // Drive the macOS window vibrancy tint (and the debug stream) from the UI theme.
+  // Guard against StrictMode's double-invoke so we don't log it twice.
+  const lastTheme = useRef<string | null>(null)
   useEffect(() => {
+    if (lastTheme.current === theme) return
+    lastTheme.current = theme
     window.dogfood?.theme?.set?.(theme)
   }, [theme])
 

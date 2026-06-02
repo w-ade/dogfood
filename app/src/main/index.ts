@@ -28,7 +28,21 @@ try {
 
 let win: BrowserWindow | null = null
 const ptys = new Map<string, import('node-pty').IPty>()
+const ptyLineBuf = new Map<string, string>()
 let projectDir: string = app.getPath('home')
+
+// Strip ANSI / OSC escape sequences so terminal output reads cleanly in the log.
+// eslint-disable-next-line no-control-regex
+const ANSI = /\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g
+function tapPty(id: string, data: string): void {
+  const combined = (ptyLineBuf.get(id) || '') + data
+  const parts = combined.split('\n')
+  ptyLineBuf.set(id, parts.pop() || '') // keep the trailing partial line
+  for (const raw of parts) {
+    const line = raw.replace(ANSI, '').replace(/\r/g, '').trimEnd()
+    if (line) dlog('log', 'pty', line.length > 2000 ? line.slice(0, 2000) + '…' : line)
+  }
+}
 
 /* ------------------------------------------------------------------ */
 /* Debug stream — feeds the standalone debug-logger window.            */
@@ -302,10 +316,14 @@ ipcMain.handle('pty:start', (e, { id, cols, rows }: { id: string; cols?: number;
     cwd: projectDir,
     env: { ...process.env, TERM: 'xterm-256color' } as { [key: string]: string }
   })
-  proc.onData((d) => win?.webContents.send('pty:data', { id, data: d }))
+  proc.onData((d) => {
+    win?.webContents.send('pty:data', { id, data: d })
+    tapPty(id, d)
+  })
   proc.onExit(({ exitCode }) => {
     win?.webContents.send('pty:exit', { id })
     ptys.delete(id)
+    ptyLineBuf.delete(id)
     dlog(exitCode ? 'error' : 'info', 'pty', `exit ${id} (code ${exitCode})`)
   })
   ptys.set(id, proc)
