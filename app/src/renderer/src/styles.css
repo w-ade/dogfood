@@ -370,3 +370,65 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; col
 .etab-add, .etab-more { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; color: var(--gray); flex: none; }
 .etab-add:hover, .etab-more:hover { background: var(--card); color: var(--ink); }
 .etab-add svg, .etab-more svg { width: 15px; height: 15px; }
+
+/* =========================================================
+   Cursor / VS Code clone (CursorClone.tsx) — dark + light
+   ========================================================= */
+.cc {
+  --b:#1c1c1c; --bar:#1e1e1e; --edge:rgba(255,255,255,.07);
+  --mut:#8c8c8c; --dim:#6a6a6a; --fg:#d6d6d6;
+  --chip:#2c2c2d; --chipbd:#3a3a3b; --tab-active:#2d2d2e;
+  position:fixed; inset:0; background:var(--b); color:var(--fg);
+  font-family:var(--font); display:flex; flex-direction:column; user-select:none; overflow:hidden;
+}
+.cc.cc-light {
+  --b:#f3f3f3; --bar:#ececec; --edge:#e3e3e3;
+  --mut:#6e6e6e; --dim:#a0a0a0; --fg:#202020;
+  --chip:#ffffff; --chipbd:#d6d6d6; --tab-active:#ffffff;
+}
+
+/* title bar */
+.cc-titlebar { height:48px; flex:none; display:flex; align-items:center; padding:0 14px 0 86px; position:relative; -webkit-app-region:drag; }
+.cc-title { position:absolute; left:0; right:0; text-align:center; font-size:13px; color:var(--mut); pointer-events:none; }
+.cc-titleright { margin-left:auto; display:flex; align-items:center; gap:14px; -webkit-app-region:no-drag; }
+.cc-ic { color:var(--mut); display:grid; place-items:center; }
+.cc-ic svg { width:17px; height:17px; }
+.cc-gear { cursor:pointer; }
+.cc-gear:hover { color:var(--fg); }
+
+/* editor / welcome */
+.cc-editor { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; }
+.cc-welcome { display:flex; flex-direction:column; align-items:center; gap:34px; transform:translateY(-24px); }
+.cc-logo { width:188px; height:188px; opacity:.13; }
+.cc-shortcuts { display:grid; grid-template-columns:max-content max-content; column-gap:26px; row-gap:16px; align-items:center; }
+.cc-sc { display:contents; }
+.cc-sc-label { color:var(--dim); font-size:16px; text-align:right; }
+.cc-sc-keys { display:flex; gap:6px; }
+.cc-key { min-width:26px; height:26px; padding:0 6px; border-radius:6px; background:var(--chip); border:1px solid var(--chipbd); color:var(--mut); font-size:13px; display:grid; place-items:center; }
+
+/* bottom panel */
+.cc-panel { flex:0 0 36%; min-height:0; display:flex; flex-direction:column; border-top:1px solid var(--edge); }
+.cc-panel-head { height:44px; flex:none; display:flex; align-items:center; padding:0 12px; }
+.cc-tabs { display:flex; align-items:center; gap:20px; font-size:14px; }
+.cc-tab { color:var(--mut); }
+.cc-tab.on { color:var(--fg); background:var(--tab-active); padding:5px 11px; border-radius:6px; }
+.cc-panel-ctrls { margin-left:auto; display:flex; align-items:center; gap:14px; color:var(--mut); font-size:13px; }
+.cc-panel-ctrls .cc-ic svg { width:16px; height:16px; }
+.cc-agent { display:flex; align-items:center; gap:7px; }
+.cc-inf { font-size:16px; }
+.cc-plus { display:flex; align-items:center; gap:1px; }
+.cc-cd { display:grid; place-items:center; color:var(--mut); }
+.cc-cd svg { width:13px; height:13px; }
+
+/* terminal content */
+.cc-term { flex:1; min-height:0; padding:10px 18px; font-family:var(--mono); font-size:13.5px; color:var(--fg); }
+.cc-term-line { display:flex; align-items:center; gap:11px; }
+.cc-dot { width:9px; height:9px; border:1.5px solid var(--mut); border-radius:50%; flex:none; }
+.cc-prompt { color:var(--mut); }
+.cc-cursor { width:8px; height:17px; background:var(--fg); margin:7px 0 0 20px; }
+.cc-readonly { text-align:center; color:var(--dim); font-size:13px; padding:0 0 12px; }
+
+/* status bar */
+.cc-status { height:28px; flex:none; display:flex; align-items:center; padding:0 14px; border-top:1px solid var(--edge); }
+.cc-status-right { margin-left:auto; display:flex; align-items:center; gap:10px; color:var(--mut); font-size:12.5px; }
+.cc-status-right .cc-ic svg { width:15px; height:15px; }
