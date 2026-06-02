@@ -18,15 +18,15 @@
     --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--font);color:var(--ink);background:var(--page);letter-spacing:-0.01em;-webkit-font-smoothing:antialiased;padding:0 0 120px}
+  body{font-family:var(--font);color:var(--ink);background:#fff;letter-spacing:-0.01em;-webkit-font-smoothing:antialiased;font-size:14px;padding:0 0 120px}
   .wrap{max-width:1060px;margin:0 auto;padding:0 28px}
-  header.top{position:sticky;top:0;z-index:50;background:rgba(245,245,247,.82);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--hairline);margin-bottom:8px}
-  header.top .wrap{display:flex;align-items:center;gap:12px;padding:16px 28px}
-  header .mark{width:26px;height:26px;border-radius:8px;background:var(--ink);display:grid;place-items:center}
-  header .mark svg{width:15px;height:15px}
-  header h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
-  header .sub{color:var(--gray);font-size:13px;margin-left:2px}
-  header .tag{margin-left:auto;font-size:11px;font-weight:600;color:var(--gray);background:var(--card);padding:5px 11px;border-radius:var(--r-pill)}
+  header.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--hairline);margin-bottom:8px}
+  header.top .wrap{display:flex;align-items:center;gap:10px;padding:13px 28px}
+  header .brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+  header .brand img{width:22px;height:22px;border-radius:6px}
+  header .sub{color:var(--gray);font-size:13px}
+  header .tag{margin-left:auto;font-size:12px;font-weight:600;color:var(--gray);text-decoration:none}
+  header .tag:hover{color:var(--ink)}
 
   .sec{padding:34px 0;border-bottom:1px solid var(--hairline)}
   .sec h2{font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gray);margin-bottom:4px}
@@ -133,9 +133,9 @@
 <body>
 
 <header class="top"><div class="wrap">
-  <span class="mark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8c0-1 1-2 3-2s3 1 3 2M13 8c0-1 1-2 3-2s3 1 3 2M4 12h16c0 4-3 7-8 7s-8-3-8-7Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span>
-  <h1>Dogfood — UI Gallery</h1><span class="sub">every screen & component, recreated for design</span>
-  <span class="tag">all CSS inline · copy freely</span>
+  <a class="brand" href="index.html"><img src="cowboy.svg" alt="" />Dogfood</a>
+  <span class="sub">UI Gallery</span>
+  <a class="tag" href="index.html">← Docs</a>
 </div></header>
 
 <div class="wrap">
