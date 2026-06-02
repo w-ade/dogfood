@@ -1,4 +1,3 @@
-import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import '@xterm/xterm/css/xterm.css'
@@ -44,8 +43,6 @@ import './styles.css'
   emit('system', 'renderer', 'renderer loaded')
 }
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-)
+// No StrictMode: its dev-only double-mount restarts the live pty on every mount
+// (spamming the debug stream and racing the cleanup kill against the new session).
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(<App />)

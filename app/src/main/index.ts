@@ -29,6 +29,7 @@ try {
 let win: BrowserWindow | null = null
 const ptys = new Map<string, import('node-pty').IPty>()
 const ptyLineBuf = new Map<string, string>()
+const killing = new Set<string>() // ids we're killing on purpose (restart/close)
 let projectDir: string = app.getPath('home')
 
 // Strip ANSI / OSC escape sequences so terminal output reads cleanly in the log.
@@ -307,7 +308,7 @@ ipcMain.handle('pty:start', (e, { id, cols, rows }: { id: string; cols?: number;
     return false
   }
   const existing = ptys.get(id)
-  if (existing) { try { existing.kill() } catch { /* noop */ } ptys.delete(id) }
+  if (existing) { killing.add(id); try { existing.kill() } catch { /* noop */ } ptys.delete(id) }
   const shellPath = process.env.SHELL || '/bin/zsh'
   const proc = pty.spawn(shellPath, [], {
     name: 'xterm-256color',
@@ -324,7 +325,9 @@ ipcMain.handle('pty:start', (e, { id, cols, rows }: { id: string; cols?: number;
     win?.webContents.send('pty:exit', { id })
     ptys.delete(id)
     ptyLineBuf.delete(id)
-    dlog(exitCode ? 'error' : 'info', 'pty', `exit ${id} (code ${exitCode})`)
+    const intentional = killing.delete(id)
+    // a kill we initiated isn't a failure — don't flag it as an error / incident
+    dlog(intentional ? 'info' : exitCode ? 'error' : 'info', 'pty', `exit ${id} (code ${exitCode})${intentional ? ' — restart' : ''}`)
   })
   ptys.set(id, proc)
   dlog('info', 'pty', `start ${id} — ${shellPath} @ ${projectDir}`)
@@ -341,7 +344,7 @@ ipcMain.on('pty:resize', (_e, { id, cols, rows }: { id: string; cols: number; ro
 
 ipcMain.on('pty:kill', (_e, { id }: { id: string }) => {
   const proc = ptys.get(id)
-  if (proc) { try { proc.kill() } catch { /* noop */ } ptys.delete(id) }
+  if (proc) { killing.add(id); try { proc.kill() } catch { /* noop */ } ptys.delete(id) }
 })
 
 ipcMain.handle('shell:reveal', (_e, p: string) => {

@@ -48,7 +48,12 @@ export default function Terminal({
     term.loadAddon(fit)
     term.open(hostRef.current)
 
+    // Only fit when the terminal is actually visible and laid out. Fitting a
+    // zero-size or display:none terminal makes xterm read `dimensions` off an
+    // uninitialized render service and throw.
     const safeFit = (): void => {
+      const el = hostRef.current
+      if (!el || el.offsetParent === null || el.clientWidth === 0 || el.clientHeight === 0) return
       try { fit.fit() } catch { /* noop */ }
     }
     safeFit()
@@ -59,6 +64,8 @@ export default function Terminal({
     api.pty.start(id, { cols: term.cols, rows: term.rows }).then(() => {
       if (disposed) return
       api.pty.resize(id, term.cols, term.rows)
+      // focus once the session is live and the element is laid out
+      term.focus()
     })
 
     const offData = api.pty.onData((tid, d) => { if (tid === id) term.write(d) })
@@ -100,5 +107,10 @@ export default function Terminal({
     if (termRef.current) termRef.current.options.theme = xtermTheme(theme)
   }, [theme])
 
-  return <div className="term-wrap"><div ref={hostRef} style={{ height: '100%' }} /></div>
+  // click anywhere in the terminal to focus it (so keystrokes reach the pty)
+  return (
+    <div className="term-wrap" onMouseDown={() => termRef.current?.focus()}>
+      <div ref={hostRef} style={{ height: '100%' }} />
+    </div>
+  )
 }

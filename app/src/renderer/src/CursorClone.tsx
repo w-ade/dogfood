@@ -29,7 +29,7 @@ const shortcuts: [string, string[]][] = [
   ['Open Browser', ['⇧', '⌘', 'B']]
 ]
 
-const tabs = ['Terminal', 'Layers']
+const tabs = ['Terminal']
 
 export default function CursorClone(): JSX.Element {
   const [theme, setTheme] = useState<'light' | 'dark'>(
