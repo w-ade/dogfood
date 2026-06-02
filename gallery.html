@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dogfood — UI Gallery</title>
+<style>
+  :root{
+    --blue:#007AFF; --blue-bg:#E9F2FF; --green:#34C759; --green-bg:#E6F8EC;
+    --pink:#FF6482; --pink-bg:#FFEEF2; --orange:#FF9500; --orange-bg:#FFF2E1; --red:#FF3B30;
+    --ink:#1C1C1E; --gray:#8E8E93; --gray2:#AEAEB2; --hairline:#E5E5EA;
+    --card:#F2F2F7; --surface:#FFFFFF; --page:#F5F5F7;
+    --r-card:20px; --r-pill:999px; --r-md:14px; --r-sm:10px;
+    --shadow:0 1px 2px rgba(0,0,0,.05),0 10px 30px rgba(0,0,0,.08);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.06);
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);color:var(--ink);background:var(--page);letter-spacing:-0.01em;-webkit-font-smoothing:antialiased;padding:0 0 120px}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 28px}
+  header.top{position:sticky;top:0;z-index:50;background:rgba(245,245,247,.82);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--hairline);margin-bottom:8px}
+  header.top .wrap{display:flex;align-items:center;gap:12px;padding:16px 28px}
+  header .mark{width:26px;height:26px;border-radius:8px;background:var(--ink);display:grid;place-items:center}
+  header .mark svg{width:15px;height:15px}
+  header h1{font-size:18px;font-weight:700;letter-spacing:-.02em}
+  header .sub{color:var(--gray);font-size:13px;margin-left:2px}
+  header .tag{margin-left:auto;font-size:11px;font-weight:600;color:var(--gray);background:var(--card);padding:5px 11px;border-radius:var(--r-pill)}
+
+  .sec{padding:34px 0;border-bottom:1px solid var(--hairline)}
+  .sec h2{font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gray);margin-bottom:4px}
+  .sec p.note{font-size:13.5px;color:var(--gray);margin-bottom:18px;max-width:60ch}
+  .row{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+  .label{font-size:12px;font-weight:600;color:var(--gray2);margin:0 0 9px 2px}
+
+  /* ===== app window frame (recreates the desktop window) ===== */
+  .frame{width:920px;max-width:100%;height:560px;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.12),0 40px 80px rgba(0,0,0,.14);border:1px solid var(--hairline);background:var(--page);display:flex;flex-direction:column;position:relative}
+  .frame.sm{height:420px}
+  .traffic{position:absolute;top:19px;left:18px;display:flex;gap:8px;z-index:60}
+  .traffic i{width:12px;height:12px;border-radius:50%}
+  .traffic .r{background:#ff5f57}.traffic .y{background:#febc2e}.traffic .g{background:#28c840}
+
+  /* topbar */
+  .topbar{height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 14px 0 86px;background:rgba(245,245,247,.9);border-bottom:1px solid var(--hairline)}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
+  .topbar .bmark{width:22px;height:22px;border-radius:7px;background:var(--ink);display:grid;place-items:center}
+  .topbar .bmark svg{width:13px;height:13px}
+  .focus{margin:0 auto;display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;background:var(--surface);border:1px solid var(--hairline);padding:6px 14px;border-radius:var(--r-pill);box-shadow:var(--shadow-sm)}
+  .focus.empty{color:var(--gray);font-weight:500}
+  .focus .kbd{font-size:10px;color:var(--gray2);border:1px solid var(--hairline);border-radius:5px;padding:1px 5px}
+  .actions{display:flex;align-items:center;gap:2px}
+  .iconbtn{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:var(--gray);background:none;border:0;cursor:pointer}
+  .iconbtn:hover{background:var(--card);color:var(--ink)}
+  .iconbtn.on{background:var(--ink);color:#fff}
+  .iconbtn svg{width:17px;height:17px}
+
+  /* canvas */
+  .cbody{flex:1;display:flex;min-height:0}
+  .canvas{flex:1;position:relative;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 1px 1px,var(--hairline) 1px,transparent 0) 0 0/22px 22px,var(--page)}
+  .empty{text-align:center;color:var(--gray);max-width:360px;padding:30px}
+  .empty .big{width:54px;height:54px;border-radius:16px;background:var(--card);display:grid;place-items:center;margin:0 auto 16px}
+  .empty .big svg{width:26px;height:26px;color:var(--gray2)}
+  .empty h3{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:6px;letter-spacing:-.02em}
+  .empty p{font-size:13.5px;line-height:1.5}
+  .empty .cta{margin-top:16px;display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:13.5px;padding:9px 16px;border-radius:var(--r-pill)}
+  .artboard{background:var(--surface);border-radius:var(--r-card);box-shadow:var(--shadow);border:1px solid var(--hairline);width:62%;height:66%;display:grid;place-items:center;overflow:hidden}
+
+  .statuspill{position:absolute;left:16px;bottom:16px;display:flex;align-items:center;gap:9px;background:var(--surface);box-shadow:var(--shadow);border:1px solid var(--hairline);padding:8px 14px;border-radius:var(--r-pill);font-size:12.5px;font-weight:600}
+  .statuspill .dot{width:8px;height:8px;border-radius:50%;background:var(--gray2)}
+  .statuspill .dot.run{background:var(--green);box-shadow:0 0 0 3px var(--green-bg)}
+  .statuspill .dot.work{background:var(--orange);box-shadow:0 0 0 3px var(--orange-bg)}
+  .statuspill .sub{color:var(--gray);font-weight:400}
+  .zoom{position:absolute;right:16px;bottom:16px;display:flex;align-items:center;gap:4px;background:var(--surface);box-shadow:var(--shadow);border:1px solid var(--hairline);padding:5px 6px;border-radius:var(--r-pill);font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums}
+  .zoom b{min-width:42px;text-align:center;font-weight:700}
+  .zoom i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:var(--gray);font-style:normal}
+
+  /* floating terminal window */
+  .fwin{position:absolute;background:var(--surface);border:1px solid var(--hairline);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.12),0 26px 64px rgba(0,0,0,.16);display:flex;flex-direction:column;overflow:hidden}
+  .fwin-header{height:36px;flex:none;display:flex;align-items:center;gap:8px;padding:0 8px 0 12px;background:linear-gradient(var(--surface),var(--page));border-bottom:1px solid var(--hairline)}
+  .fwin-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-bg)}
+  .fwin-icon{width:15px;height:15px;color:var(--gray);display:grid;place-items:center}
+  .fwin-icon svg{width:15px;height:15px}
+  .fwin-title{font-size:12px;font-weight:600;letter-spacing:-.01em}
+  .fwin-min{margin-left:auto;width:24px;height:24px;border-radius:7px;color:var(--gray);display:grid;place-items:center}
+  .fwin-min svg{width:15px;height:15px}
+  .fwin-body{flex:1;min-height:0;position:relative;padding:10px 12px;font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--ink);overflow:hidden}
+  .fwin-body .muted{color:var(--gray)}
+  .fwin-body .b{color:var(--blue)}.fwin-body .g{color:var(--green)}.fwin-body .o{color:var(--orange)}
+  .fwin-body .cur{display:inline-block;width:7px;height:14px;background:var(--blue);vertical-align:-2px;border-radius:1px}
+  .fwin-resize{position:absolute;right:2px;bottom:2px;width:16px;height:16px;color:var(--gray2);display:grid;place-items:center}
+  .fwin-resize svg{width:13px;height:13px}
+
+  /* activity panel */
+  .activity{width:300px;flex:none;background:var(--surface);border-left:1px solid var(--hairline);display:flex;flex-direction:column}
+  .ahead{height:46px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 18px;border-bottom:1px solid var(--hairline)}
+  .ahead h3{font-size:14px;font-weight:700}
+  .alist{flex:1;overflow:hidden;padding:6px}
+  .arow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:11px 12px;border-radius:var(--r-md)}
+  .arow .hash{font-family:var(--mono);font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px}
+  .arow .hash svg{width:12px;height:12px;color:var(--gray2)}
+  .arow .subj{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .arow .subj .c{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#fff;background:var(--blue);padding:2px 8px;border-radius:var(--r-pill);margin-right:8px}
+  .arow .stat{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;justify-self:end}
+  .arow .stat .when{color:var(--gray);font-weight:400;font-variant-numeric:tabular-nums}
+  .sd{width:9px;height:9px;border-radius:50%}
+  .sd.current{background:var(--green)}.sd.past{background:var(--gray2)}.sd.building{background:var(--orange)}.sd.failed{background:var(--red)}
+
+  /* command palette */
+  .palette{width:560px;max-width:100%;background:var(--surface);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;border:1px solid var(--hairline)}
+  .pinput{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--hairline)}
+  .pinput svg{width:18px;height:18px;color:var(--gray)}
+  .pinput input{border:0;outline:0;font-family:inherit;font-size:16px;background:none;width:100%}
+  .plist{padding:6px}
+  .pitem{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--r-md);font-size:13.5px}
+  .pitem .nm{font-weight:600}
+  .pitem .pth{color:var(--gray);font-size:12px;margin-left:auto;font-family:var(--mono)}
+  .pitem .fic{width:16px;height:16px;color:var(--gray)}
+  .pitem.sel{background:var(--blue);color:#fff}
+  .pitem.sel .pth{color:rgba(255,255,255,.8)}.pitem.sel .fic{color:#fff}
+  .pfoot{padding:8px 16px;border-top:1px solid var(--hairline);font-size:11px;color:var(--gray2);display:flex;gap:14px}
+  .pfoot b{color:var(--gray);font-weight:600}
+
+  /* primitives row */
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;padding:8px 14px;border-radius:var(--r-pill)}
+  .pill.blue{background:var(--blue-bg);color:var(--blue)}.pill.green{background:var(--green-bg);color:var(--green)}
+  .pill.orange{background:var(--orange-bg);color:var(--orange)}.pill.gray{background:var(--card);color:var(--gray)}
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;max-width:760px}
+  .sw{border-radius:var(--r-sm);overflow:hidden;box-shadow:var(--shadow-sm);background:var(--surface)}
+  .sw .c{height:54px}.sw .m{padding:8px 10px;font-size:11px}.sw .m b{display:block;font-size:12px}.sw .m span{color:var(--gray);font-family:var(--mono);font-size:10px}
+  .panelbox{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-card);box-shadow:var(--shadow);overflow:hidden}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+  <span class="mark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8c0-1 1-2 3-2s3 1 3 2M13 8c0-1 1-2 3-2s3 1 3 2M4 12h16c0 4-3 7-8 7s-8-3-8-7Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span>
+  <h1>Dogfood — UI Gallery</h1><span class="sub">every screen & component, recreated for design</span>
+  <span class="tag">all CSS inline · copy freely</span>
+</div></header>
+
+<div class="wrap">
+
+<!-- ============ 1. FULL APP — focused + terminal + activity ============ -->
+<div class="sec">
+  <h2>1 · Full app — focused, terminal floating, activity open</h2>
+  <p class="note">The whole thing together: top bar, canvas, the floating terminal window, and the activity panel. This is the composite to design against.</p>
+  <div class="frame">
+    <div class="traffic"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+    <div class="topbar">
+      <div class="brand"><span class="bmark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8c0-1 1-2 3-2s3 1 3 2M13 8c0-1 1-2 3-2s3 1 3 2M4 12h16c0 4-3 7-8 7s-8-3-8-7Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span>dogfood</div>
+      <div class="focus">Button.tsx <span class="kbd">⌘P</span></div>
+      <div class="actions">
+        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
+        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="iconbtn on"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2 6 4-14 2 8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="iconbtn on"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>
+    <div class="cbody">
+      <div class="canvas">
+        <div class="artboard"><div class="empty"><div class="big"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="#AEAEB2" stroke-width="2" stroke-linejoin="round"/><path d="M13 3v5h5" stroke="#AEAEB2" stroke-width="2" stroke-linejoin="round"/></svg></div><h3>Button.tsx</h3><p>src/components/Button.tsx</p></div></div>
+
+        <!-- floating terminal -->
+        <div class="fwin" style="left:300px;top:150px;width:430px;height:250px">
+          <div class="fwin-header"><span class="fwin-dot"></span><span class="fwin-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="fwin-title">claude — terminal</span><button class="fwin-min"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+          <div class="fwin-body">
+            <div class="muted">~/myapp $ <span style="color:var(--ink)">claude</span></div>
+            <div class="b">⏺ Claude Code</div>
+            <div class="muted">&gt; make the hover state bouncier</div>
+            <div class="g">⏺ Updated Button.tsx — added a spring on hover</div>
+            <div>~/myapp $ <span class="cur"></span></div>
+          </div>
+          <div class="fwin-resize"><svg viewBox="0 0 16 16" fill="none"><path d="M13 7l-6 6M13 11l-2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        </div>
+
+        <div class="statuspill"><span class="dot run"></span>Terminal <span class="sub">· myapp</span></div>
+        <div class="zoom"><i>−</i><b>100%</b><i>+</i></div>
+      </div>
+
+      <!-- activity panel -->
+      <div class="activity">
+        <div class="ahead"><h3>Activity</h3><button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+        <div class="alist">
+          <div class="arow"><span class="hash"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M2 12h6M16 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>b7e2a1d</span><span class="subj"><span class="c">→ Current</span>spring on hover</span><span class="stat"><span class="sd current"></span><span class="when">now</span></span></div>
+          <div class="arow"><span class="hash"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M2 12h6M16 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>a4d9c3f</span><span class="subj">round the corners</span><span class="stat"><span class="sd past"></span><span class="when">4m</span></span></div>
+          <div class="arow"><span class="hash"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M2 12h6M16 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>c8f4b2e</span><span class="subj">initial Button</span><span class="stat"><span class="sd past"></span><span class="when">12m</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 2. EMPTY STATE ============ -->
+<div class="sec">
+  <h2>2 · Empty state — no component focused</h2>
+  <p class="note">What you see on open, before picking a component. The whole canvas is the invite.</p>
+  <div class="frame sm">
+    <div class="traffic"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+    <div class="topbar">
+      <div class="brand"><span class="bmark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8c0-1 1-2 3-2s3 1 3 2M13 8c0-1 1-2 3-2s3 1 3 2M4 12h16c0 4-3 7-8 7s-8-3-8-7Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span>dogfood</div>
+      <div class="focus empty">Pick a component <span class="kbd">⌘P</span></div>
+      <div class="actions">
+        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
+        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2 6 4-14 2 8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>
+    <div class="cbody"><div class="canvas">
+      <div class="empty">
+        <div class="big"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8c0-1 1-2 3-2s3 1 3 2M13 8c0-1 1-2 3-2s3 1 3 2M4 12h16c0 4-3 7-8 7s-8-3-8-7Z" stroke="#AEAEB2" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <h3>myapp</h3>
+        <p>Open a project, then pick the component you want to forge. Prompt Claude Code in the terminal and watch it render here.</p>
+        <div class="cta">Pick a component&nbsp; ⌘P</div>
+      </div>
+      <div class="statuspill"><span class="dot"></span>claude <span class="sub">· myapp</span></div>
+      <div class="zoom"><i>−</i><b>100%</b><i>+</i></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ============ 3. PIECES ============ -->
+<div class="sec">
+  <h2>3 · Pieces — top bar, command palette, floating terminal</h2>
+  <div class="row">
+    <div>
+      <p class="label">Top bar</p>
+      <div class="panelbox" style="width:560px;max-width:100%">
+        <div class="topbar" style="background:var(--page)">
+          <div class="brand"><span class="bmark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8c0-1 1-2 3-2s3 1 3 2M13 8c0-1 1-2 3-2s3 1 3 2M4 12h16c0 4-3 7-8 7s-8-3-8-7Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span>dogfood</div>
+          <div class="focus">Button.tsx <span class="kbd">⌘P</span></div>
+          <div class="actions">
+            <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
+            <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+            <button class="iconbtn on"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2 6 4-14 2 8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:26px">
+    <div>
+      <p class="label">Command palette (⌘P)</p>
+      <div class="palette">
+        <div class="pinput"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input value="butt" readonly></div>
+        <div class="plist">
+          <div class="pitem sel"><span class="fic"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="nm">Button.tsx</span><span class="pth">src/components/Button.tsx</span></div>
+          <div class="pitem"><span class="fic"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="nm">IconButton.tsx</span><span class="pth">src/ui/IconButton.tsx</span></div>
+          <div class="pitem"><span class="fic"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="nm">ButtonGroup.tsx</span><span class="pth">src/ui/ButtonGroup.tsx</span></div>
+        </div>
+        <div class="pfoot"><span><b>↑↓</b> navigate</span><span><b>↵</b> focus</span><span><b>esc</b> close</span></div>
+      </div>
+    </div>
+
+    <div>
+      <p class="label">Floating terminal window</p>
+      <div class="fwin" style="position:relative;left:0;top:0;width:400px;height:230px">
+        <div class="fwin-header"><span class="fwin-dot"></span><span class="fwin-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="fwin-title">claude — terminal</span><button class="fwin-min"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+        <div class="fwin-body">
+          <div class="muted">~/myapp $ <span style="color:var(--ink)">claude</span></div>
+          <div class="b">⏺ Claude Code · ready</div>
+          <div class="muted">&gt; build a pill button</div>
+          <div class="g">⏺ Created Button.tsx</div>
+          <div>~/myapp $ <span class="cur"></span></div>
+        </div>
+        <div class="fwin-resize"><svg viewBox="0 0 16 16" fill="none"><path d="M13 7l-6 6M13 11l-2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 4. SMALL CONTROLS ============ -->
+<div class="sec">
+  <h2>4 · Small controls — status pill, zoom, icon buttons</h2>
+  <div class="row" style="align-items:center">
+    <div><p class="label">Status pill — idle / working / ready</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;position:static">
+        <span class="statuspill" style="position:static"><span class="dot"></span>claude <span class="sub">· myapp</span></span>
+        <span class="statuspill" style="position:static"><span class="dot work"></span>claude <span class="sub">· editing Button.tsx…</span></span>
+        <span class="statuspill" style="position:static"><span class="dot run"></span>Terminal <span class="sub">· myapp</span></span>
+      </div>
+    </div>
+    <div><p class="label">Zoom</p><span class="zoom" style="position:static"><i>−</i><b>100%</b><i>+</i></span></div>
+    <div><p class="label">Icon buttons</p>
+      <div style="display:flex;gap:6px">
+        <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
+        <button class="iconbtn on"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 5. TOKENS ============ -->
+<div class="sec">
+  <h2>5 · Tokens — color, type, pills</h2>
+  <p class="label">Color</p>
+  <div class="swatches" id="sw"></div>
+  <p class="label" style="margin-top:24px">Pills & badges</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <span class="pill blue">✓ Single focus</span><span class="pill green">✓ Real terminal</span>
+    <span class="pill orange">● Working</span><span class="pill gray">○ Idle</span>
+  </div>
+  <p class="label" style="margin-top:24px">Type — SF Pro / system</p>
+  <div style="font-size:30px;font-weight:700;letter-spacing:-.03em">Build the maker</div>
+  <div style="font-size:16px;font-weight:600;margin-top:6px">Pick a component to focus</div>
+  <div style="font-family:var(--mono);font-size:13px;color:var(--gray);margin-top:6px">~/myapp $ claude</div>
+</div>
+
+</div>
+
+<script>
+  const SW=[['Blue','#007AFF'],['Blue bg','#E9F2FF'],['Green','#34C759'],['Green bg','#E6F8EC'],['Pink','#FF6482'],['Orange','#FF9500'],['Red','#FF3B30'],['Ink','#1C1C1E'],['Gray','#8E8E93'],['Hairline','#E5E5EA'],['Card','#F2F2F7'],['Surface','#FFFFFF']];
+  document.getElementById('sw').innerHTML=SW.map(([n,h])=>`<div class="sw"><div class="c" style="background:${h};${h==='#FFFFFF'?'border-bottom:1px solid var(--hairline)':''}"></div><div class="m"><b>${n}</b><span>${h}</span></div></div>`).join('');
+</script>
+</body>
+</html>
