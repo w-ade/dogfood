@@ -1,0 +1,233 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import Terminal from './Terminal'
+
+type Project = { path: string; name: string }
+type Activity = { hash: string; subject: string; when: string; current: boolean }
+
+// ---- tiny inline icon set (thin-stroke, rounded) ----
+const I = {
+  dog: <svg viewBox="0 0 24 24" fill="none"><path d="M5 8c0-1 1-2 3-2s3 1 3 2M13 8c0-1 1-2 3-2s3 1 3 2M4 12h16c0 4-3 7-8 7s-8-3-8-7Z" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>,
+  folder: <svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>,
+  search: <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2"/><path d="M20 20l-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
+  activity: <svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2 6 4-14 2 8h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  terminal: <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M7 9l3 3-3 3M13 15h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  file: <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/><path d="M13 3v5h5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>,
+  commit: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2"/><path d="M2 12h6M16 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
+  close: <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
+}
+
+const base = (p: string): string => p.split('/').pop() || p
+
+export default function App(): JSX.Element {
+  const [project, setProject] = useState<Project | null>(null)
+  const [focus, setFocus] = useState<string | null>(null)
+  const [components, setComponents] = useState<string[]>([])
+  const [paletteOpen, setPaletteOpen] = useState(false)
+  const [activityOpen, setActivityOpen] = useState(false)
+  const [activity, setActivity] = useState<Activity[]>([])
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [bg, setBg] = useState<'grid' | 'plain' | 'dark'>('grid')
+  const [zoom, setZoom] = useState(100)
+  const termEverOpened = useRef(false)
+  if (drawerOpen) termEverOpened.current = true
+
+  // initial project (home until one is opened)
+  useEffect(() => {
+    window.dogfood.currentProject().then(setProject)
+  }, [])
+
+  const refreshActivity = useCallback(() => {
+    window.dogfood.activity().then(setActivity)
+  }, [])
+
+  const openProject = useCallback(async () => {
+    const p = await window.dogfood.openProject()
+    if (!p) return
+    setProject(p)
+    setFocus(null)
+    setComponents([])
+    refreshActivity()
+  }, [refreshActivity])
+
+  const openPalette = useCallback(async () => {
+    setPaletteOpen(true)
+    if (!components.length) setComponents(await window.dogfood.listComponents())
+  }, [components.length])
+
+  // keyboard shortcuts
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      const meta = e.metaKey || e.ctrlKey
+      if (meta && e.key === 'o') { e.preventDefault(); openProject() }
+      else if (meta && e.key === 'p') { e.preventDefault(); paletteOpen ? setPaletteOpen(false) : openPalette() }
+      else if (meta && e.key === 'j') { e.preventDefault(); setDrawerOpen((v) => !v) }
+      else if (meta && e.key === 'e') { e.preventDefault(); setActivityOpen((v) => { const n = !v; if (n) refreshActivity(); return n }) }
+      else if (e.key === 'Escape') setPaletteOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [openProject, openPalette, paletteOpen, refreshActivity])
+
+  return (
+    <div className="app">
+      {/* ---------- top bar ---------- */}
+      <div className="topbar">
+        <div className="brand"><span className="mark">{I.dog}</span>dogfood</div>
+
+        <button className={`focus ${focus ? '' : 'empty'}`} onClick={openPalette}>
+          {focus ? base(focus) : 'Pick a component'}
+          <span className="kbd">⌘P</span>
+        </button>
+
+        <div className="actions">
+          <button className="iconbtn" title="Open project (⌘O)" onClick={openProject}>{I.folder}</button>
+          <button className="iconbtn" title="Find component (⌘P)" onClick={openPalette}>{I.search}</button>
+          <button className={`iconbtn ${activityOpen ? 'on' : ''}`} title="Activity (⌘E)"
+            onClick={() => setActivityOpen((v) => { const n = !v; if (n) refreshActivity(); return n })}>{I.activity}</button>
+          <button className={`iconbtn ${drawerOpen ? 'on' : ''}`} title="Terminal (⌘J)"
+            onClick={() => setDrawerOpen((v) => !v)}>{I.terminal}</button>
+        </div>
+      </div>
+
+      {/* ---------- body ---------- */}
+      <div className="body">
+        <div className={`canvas bg-${bg}`}>
+          {focus ? (
+            <div className="artboard" style={{ transform: `scale(${zoom / 100})` }}>
+              <div className="empty">
+                <div className="big">{I.file}</div>
+                <h2>{base(focus)}</h2>
+                <p>{focus}</p>
+                <p style={{ marginTop: 10, color: 'var(--gray2)' }}>Live render wires up next — open the terminal and type <b>claude</b> to start building it.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="empty">
+              <div className="big">{I.dog}</div>
+              <h2>{project ? project.name : 'No project'}</h2>
+              <p>Open a project, then pick the component you want to forge. Prompt Claude Code in the terminal and watch it render here.</p>
+              <button className="cta" onClick={project ? openPalette : openProject}>
+                {project ? 'Pick a component  ⌘P' : 'Open a project  ⌘O'}
+              </button>
+            </div>
+          )}
+
+          {/* floating controls */}
+          <button className="statuspill" onClick={() => setDrawerOpen((v) => !v)}>
+            <span className={`dot ${drawerOpen ? 'run' : ''}`} />
+            {drawerOpen ? 'Terminal ready' : 'claude'}
+            <span className="sub">· {project ? project.name : 'no project'}</span>
+          </button>
+
+          <div className="zoom">
+            <button onClick={() => setZoom((z) => Math.max(25, z - 10))}>−</button>
+            <span>{zoom}%</span>
+            <button onClick={() => setZoom((z) => Math.min(200, z + 10))}>+</button>
+          </div>
+        </div>
+
+        {/* ---------- activity panel (closeable) ---------- */}
+        {activityOpen && (
+          <div className="activity">
+            <div className="ahead">
+              <h3>Activity</h3>
+              <button className="iconbtn" onClick={() => setActivityOpen(false)}>{I.close}</button>
+            </div>
+            <div className="alist">
+              {activity.length === 0 ? (
+                <div className="aempty">No activity yet.<br />History of changes to this project will appear here.</div>
+              ) : activity.map((a) => (
+                <div className="arow" key={a.hash + a.when}>
+                  <span className="hash">{I.commit}{a.hash}</span>
+                  <span className="subj">
+                    {a.current && <span className="cur">→ Current</span>}
+                    {a.subject}
+                  </span>
+                  <span className="stat">
+                    <span className={`sd ${a.current ? 'current' : 'past'}`} />
+                    {a.current ? 'Running' : 'Stopped'}
+                    <span className="when">{a.when}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ---------- terminal drawer ---------- */}
+      <div className="drawer" style={{ height: drawerOpen ? 300 : 26 }}>
+        <div className="drawer-handle" onClick={() => setDrawerOpen((v) => !v)}>
+          <span className="lbl"><span className="dot" />{drawerOpen ? 'terminal' : 'claude · terminal'}</span>
+          <span className="grip" />
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 10 }}>⌘J</span>
+        </div>
+        {termEverOpened.current && (
+          <div style={{ flex: 1, minHeight: 0, display: drawerOpen ? 'block' : 'none' }}>
+            <Terminal projectKey={project?.path || 'home'} />
+          </div>
+        )}
+      </div>
+
+      {/* ---------- command palette ---------- */}
+      {paletteOpen && (
+        <CommandPalette
+          components={components}
+          onPick={(f) => { setFocus(f); setPaletteOpen(false) }}
+          onClose={() => setPaletteOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+function CommandPalette({
+  components, onPick, onClose
+}: {
+  components: string[]
+  onPick: (f: string) => void
+  onClose: () => void
+}): JSX.Element {
+  const [q, setQ] = useState('')
+  const [sel, setSel] = useState(0)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => { inputRef.current?.focus() }, [])
+
+  const filtered = components
+    .filter((c) => c.toLowerCase().includes(q.toLowerCase()))
+    .slice(0, 200)
+
+  useEffect(() => { setSel(0) }, [q])
+
+  const onKey = (e: React.KeyboardEvent): void => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setSel((s) => Math.min(filtered.length - 1, s + 1)) }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setSel((s) => Math.max(0, s - 1)) }
+    else if (e.key === 'Enter') { e.preventDefault(); if (filtered[sel]) onPick(filtered[sel]) }
+  }
+
+  return (
+    <div className="palette-scrim" onClick={onClose}>
+      <div className="palette" onClick={(e) => e.stopPropagation()}>
+        <div className="pinput">
+          {I.search}
+          <input ref={inputRef} value={q} placeholder="Find a component to focus…"
+            onChange={(e) => setQ(e.target.value)} onKeyDown={onKey} />
+        </div>
+        <div className="plist">
+          {filtered.length === 0 ? (
+            <div className="pempty">{components.length ? 'No matches.' : 'No .tsx / .jsx components found in this project.'}</div>
+          ) : filtered.map((c, i) => (
+            <div key={c} className={`pitem ${i === sel ? 'sel' : ''}`}
+              onMouseEnter={() => setSel(i)} onClick={() => onPick(c)}>
+              <span className="fic">{I.file}</span>
+              <span className="nm">{base(c)}</span>
+              <span className="pth">{c}</span>
+            </div>
+          ))}
+        </div>
+        <div className="pfoot"><span><b>↑↓</b> navigate</span><span><b>↵</b> focus</span><span><b>esc</b> close</span></div>
+      </div>
+    </div>
+  )
+}
