@@ -246,7 +246,7 @@
       <div class="pillrow">
         <span class="pill blue"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 1.8 3-.2 1 2.8 2.6 1.4-.6 3 1.6 2.5-2 2.2.2 3-2.8 1-1.4 2.6-3-.6L12 22l-2.5-1.6-3 .6-1.4-2.6-3-1 .2-3-2-2.2L2 9.6l-.6-3 2.6-1.4 1-2.8 3 .2z"/><path d="M8.5 12.5l2.5 2.5 4.5-5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>Single focus</span>
         <span class="pill green"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l8 3v6c0 5-3.5 8-8 11-4.5-3-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5L15.5 9" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>Real terminal</span>
-        <span class="pill pink"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>Newt-styled</span>
+        <span class="pill pink"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>Floating canvas</span>
       </div>
 
       <div class="card timeline">
@@ -369,7 +369,7 @@
   <section>
     <div class="eyebrow">The visual system</div>
     <h2>Design language</h2>
-    <p class="muted">Apple / iOS flavored — SF Pro, white &amp; soft-gray cards, system colors, fully-rounded pills. <b>Newt drives layout; this drives the visual system.</b> The app should wear this too.</p>
+    <p class="muted">Apple / iOS flavored — SF Pro, white &amp; soft-gray cards, system colors, fully-rounded pills. Calm, light, and spatial — floating capsules on a quiet canvas. The app wears this too.</p>
 
     <h3 style="margin-top:24px">Color</h3>
     <div class="swatches" id="swatches"></div>
@@ -377,16 +377,16 @@
     <h3>Type — SF Pro / system</h3>
     <div style="margin-bottom:28px">
       <div class="typerow"><span>display / 40 / 700</span><div style="font-size:32px;font-weight:700;letter-spacing:-.03em">Build the maker</div></div>
-      <div class="typerow"><span>title / 24 / 700</span><div style="font-size:24px;font-weight:700;letter-spacing:-.02em">Trip Info</div></div>
-      <div class="typerow"><span>body / 16 / 600</span><div style="font-size:16px;font-weight:600">Main Street Bus Stop</div></div>
-      <div class="typerow"><span>label / 13 / 600</span><div style="font-size:13px;font-weight:600;color:var(--gray)">Passenger 2</div></div>
+      <div class="typerow"><span>title / 24 / 700</span><div style="font-size:24px;font-weight:700;letter-spacing:-.02em">Component inventory</div></div>
+      <div class="typerow"><span>body / 16 / 600</span><div style="font-size:16px;font-weight:600">Pick a component to focus</div></div>
+      <div class="typerow"><span>label / 13 / 600</span><div style="font-size:13px;font-weight:600;color:var(--gray)">v0 · spine</div></div>
       <div class="typerow"><span>mono / 13</span><div style="font-family:var(--mono);font-size:13px">~/myapp $ claude</div></div>
     </div>
 
     <h3>Pills &amp; badges</h3>
     <div class="pillrow" style="margin:10px 0 28px">
-      <span class="pill blue">✓ Verified ID</span>
-      <span class="pill green">✓ Safe Driver</span>
+      <span class="pill blue">✓ Single focus</span>
+      <span class="pill green">✓ Real terminal</span>
       <span class="pill orange">● Working</span>
       <span class="pill gray">○ Idle</span>
     </div>
@@ -430,8 +430,8 @@ const COMPONENTS = [
   {name:'RulerOverlay', group:'Canvas', scope:'future', desc:'Measurement rulers / guides.'},
   // terminal
   {name:'TerminalDrawer', group:'Terminal', scope:'v0', desc:'Collapsible drawer that docks beside the canvas.'},
-  {name:'Terminal', group:'Terminal', scope:'v0', desc:'Real xterm + pty shell, Newt-styled. Type claude.'},
-  {name:'TerminalStatusPill', group:'Terminal', scope:'v0', desc:'Collapsed handle/status (Newt’s bottom-left slot).'},
+  {name:'Terminal', group:'Terminal', scope:'v0', desc:'Real xterm + pty shell. Type claude.'},
+  {name:'TerminalStatusPill', group:'Terminal', scope:'v0', desc:'Minimized terminal status — shows when CC is mid-task.'},
   {name:'DrawerHandle', group:'Terminal', scope:'v0', desc:'Edge grab handle + resize; ⌘J toggle.'},
   {name:'TerminalTheme', group:'Terminal', scope:'v0', desc:'The pretty xterm color/font theme tokens.'},
   // project / focus
@@ -455,7 +455,7 @@ const COMPONENTS = [
   {name:'PreviewCell', group:'Board', scope:'future', desc:'The reusable preview-cell abstraction.'},
   // design system primitives
   {name:'Card', group:'Design System', scope:'v0', desc:'Rounded surface — the base container.'},
-  {name:'Pill', group:'Design System', scope:'v0', desc:'Capsule badge (Verified-ID style).'},
+  {name:'Pill', group:'Design System', scope:'v0', desc:'Capsule badge (status / label).'},
   {name:'Timeline', group:'Design System', scope:'v0', desc:'Stop/step timeline with nodes (build/roadmap).'},
   {name:'Button', group:'Design System', scope:'v0', desc:'Primary / secondary button.'},
   {name:'Tooltip', group:'Design System', scope:'v0', desc:'Hover hint.'},
@@ -478,9 +478,9 @@ const DECISIONS = [
   {t:'Preview wrapper: hybrid', b:'v0 ships a blank wrapper you fill once per project. Auto-sniffing (Tailwind / globals / providers) is a later upgrade.'},
   {t:'Canvas-dominant, terminal as drawer', b:'The canvas is the window; the terminal is a panel you summon. Maximizes looking-at-the-thing.'},
   {t:'Drawer behavior', b:'Collapsed = a thin <b>status pill</b> showing CC is mid-task. Summon = ⌘J + edge handle. Docks beside the canvas while building so you see CC stream <b>and</b> the render at once.'},
-  {t:'Visual north star: Newt', b:'Floating rounded capsules on a calm canvas, soft shadows, hairline borders, near-black icons, active = solid black square. Borrow the system, not the drawing tools.'},
-  {t:'The terminal is a REAL terminal', b:'No “Ask” pill abstraction. It’s Terminal.app inside Dogfood — type <b>claude</b> to start CC. We borrow Newt’s <b>paint only</b>: rounded, soft shadow, good monospace.'},
-  {t:'No left toolbar in v0', b:'Newt’s left capsule holds drawing tools; Dogfood has none, so drop it for v0. View controls ride in the top bar / by the zoom pill.'},
+  {t:'Visual north star', b:'Floating rounded capsules on a calm canvas, soft shadows, hairline borders, near-black icons, active = solid black square. Calm, light, Apple-flavored.'},
+  {t:'The terminal is a REAL terminal', b:'No “Ask” pill abstraction. It’s Terminal.app inside Dogfood — type <b>claude</b> to start CC. Styled to match the system: rounded, soft shadow, good monospace.'},
+  {t:'No left toolbar in v0', b:'Dogfood has no drawing tools, so there’s no left toolbar in v0. View controls ride in the top bar / by the zoom pill.'},
 ];
 
 const SWATCHES = [

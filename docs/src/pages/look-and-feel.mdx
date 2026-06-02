@@ -1,60 +1,48 @@
 # Look & feel
 
-The visual north star is the **Newt** reference (`references/IMG_0359.jpeg`). Dogfood
-should look *damn near identical* in its visual language — while being a component forge,
-not a drawing app.
+Dogfood's visual system is **Apple / iOS flavored**: SF Pro, white and soft-gray cards,
+system colors, and fully-rounded pills — calm, light, and spatial. The app and the docs
+both wear it.
 
 ## The language: floating capsules on a calm canvas
 
-- A rounded app window with a large **soft shadow**, floating on a color field. Chrome is
-  a warm **near-white** (off-white, not pure `#fff`), with hairline light-gray borders.
-- **Every control is a floating rounded capsule** with a soft shadow — nothing docks to
-  the window edges. The toolbar floats. The prompt floats. The zoom floats.
-- Palette is whisper-quiet: off-whites, light-gray hairlines, **near-black** (`~#1A1A1A`)
-  for icons and text. Exactly one accent (Newt's green dot).
+- A rounded app window with a large **soft shadow**. Chrome is a warm **near-white**
+  (off-white, not pure `#fff`), with hairline light-gray borders.
+- **Controls are floating rounded capsules** with a soft shadow, sitting on the canvas
+  rather than docked to the edges.
+- Palette is whisper-quiet: off-whites, light-gray hairlines, **near-black** (`#1c1c1e`)
+  for icons and text. System accents used sparingly (blue `#007aff`, green `#34c759`).
 - **Active state = solid black rounded square with a white glyph.**
-- Thin-stroke, rounded **line icons** (Lucide/Phosphor family). Generous negative space.
-- The **canvas is the hero** — a faint graph-paper grid artboard, centered.
+- Thin-stroke, rounded **line icons**. Generous negative space.
+- The **canvas is the hero** — a faint grid surface that the preview and terminal float on.
 
-## Tokens (first pass — refine against the real pixels)
+## Tokens
 
-- Window radius: large (~16–20px). Capsule radius: pill or ~12–14px. Button radius: ~10px.
-- Surface: warm off-white. Border: 1px light gray hairline. Shadow: soft, wide, low-opacity.
-- Text: small, medium weight, system sans (SF Pro vibe). Secondary text = muted gray.
-- Accent: a single status color (start with Newt's green).
-
-## Element map (Newt → Dogfood)
-
-| Newt | Dogfood |
+| Token | Value |
 |---|---|
-| `🐸 Newt` logo + wordmark | `dogfood` mark + wordmark |
-| green dot + `− 1px +` stepper | a **status dot** (CC idle/working, preview connected); drop the px stepper |
-| center: `symmetry` filename | the **focus component** name (`Button.tsx`); click → ⌘P picker |
-| right: undo·redo·share·`</>`·split·layers | trimmed: **`</>`** peek code · **split** toggle terminal · maybe export/reveal; drop undo/redo (git/CC owns history) |
-| left floating tool capsule | **dropped for v0** (no drawing tools); view controls (fit, background) ride in the top bar / by the zoom pill |
-| bottom-left `+ Ask Newt…` pill | the terminal's **collapsed handle/status pill** (expands the real terminal) |
-| bottom-right `− 33× +` | identical — canvas zoom |
+| Surface / page | `#ffffff` · `#f5f5f7` |
+| Card | `#f2f2f7` |
+| Ink / gray | `#1c1c1e` · `#8e8e93` |
+| Hairline | `#e5e5ea` |
+| Blue / green / pink | `#007aff` · `#34c759` · `#ff6482` |
+| Radius (card / md / sm / pill) | 20 · 14 · 10 · ∞ |
+| Font | `-apple-system` (SF Pro) · mono `SF Mono` |
 
 ## The terminal is a real terminal
 
 There is **no "Ask Claude" pill** and no special CC mode. Dogfood's terminal is a genuine
 shell — *Terminal.app inside Dogfood*. You type `claude` to start Claude Code, just like
-you would in any terminal (and `npm`, `git`, `vim`, anything else).
+in any terminal (and `npm`, `git`, `vim`, anything else).
 
-We borrow Newt's **paint only**:
+It's styled to match the system — rounded corners, soft shadow, hairline border, a good
+monospace, a calm near-white (or dark) theme — but functionally it is the real thing
+(xterm + a real pty).
 
-- round the corners, soft shadow, hairline border
-- a good monospace, calm near-white (or dark) theme, comfortable padding
+## On the canvas
 
-…so the terminal looks like it belongs in the pretty world — but functionally it is the
-real thing (xterm + a real pty).
+The terminal **floats on the canvas** as a free, draggable, resizable window — it and the
+preview are independent objects with z-order that can overlap, like windows on a desktop.
+The minimized terminal collapses to a small **status pill**; ⌘J summons or focuses it.
 
-It lives as the **drawer**: canvas-dominant at rest, summoned with ⌘J + the edge handle,
-collapsing to a thin **status pill** (Newt's bottom-left slot) that shows when something
-is running.
-
-## What we deliberately do NOT borrow from Newt
-
-- Drawing tools (brush, eraser, fill, shapes, eyedropper) — Dogfood has no drawing engine.
-- The pixel/`1px` brush controls.
-- The layers model (maybe later as component states/variants, not pixel layers).
+(This supersedes the earlier bottom-drawer idea — see decision 14 in
+`brainstorming/decisions.md`.)
