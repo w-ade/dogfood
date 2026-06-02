@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import cowboyDark from './assets/cowboy.svg'
 import cowboyLight from './assets/cowboy-inverse.svg'
 
@@ -40,6 +40,11 @@ export default function CursorClone(): JSX.Element {
       try { localStorage.setItem('dogfood-theme', n) } catch { /* noop */ }
       return n
     })
+
+  // Drive the macOS window vibrancy tint (and the debug stream) from the UI theme.
+  useEffect(() => {
+    window.dogfood?.theme?.set?.(theme)
+  }, [theme])
 
   const [panelW, setPanelW] = useState(420)
   const [collapsed, setCollapsed] = useState(false)

@@ -34,10 +34,20 @@ root.innerHTML = `
       <button id="clear" class="dbg-btn" title="Clear log">Clear</button>
     </div>
   </header>
+  <div class="dbg-incident" id="incident" hidden>
+    <span class="dbg-inc-glyph">!</span>
+    <div class="dbg-inc-body">
+      <div class="dbg-inc-title">Incident detected</div>
+      <div class="dbg-inc-msg" id="inc-msg"></div>
+    </div>
+    <button class="dbg-heal" id="heal">Heal</button>
+    <button class="dbg-inc-x" id="inc-x" title="Dismiss">&times;</button>
+  </div>
   <div class="dbg-log" id="log"></div>
   <footer class="dbg-foot">
     <span id="count">0 events</span>
     <span class="dbg-spacer"></span>
+    <button class="dbg-link" id="reveal">Reveal logs</button>
     <label class="dbg-auto"><input type="checkbox" id="auto" checked /> Autoscroll</label>
   </footer>
 `
@@ -51,6 +61,11 @@ const qInput = document.getElementById('q') as HTMLInputElement
 const pauseBtn = document.getElementById('pause') as HTMLButtonElement
 const clearBtn = document.getElementById('clear') as HTMLButtonElement
 const autoBox = document.getElementById('auto') as HTMLInputElement
+const incidentEl = document.getElementById('incident') as HTMLElement
+const incMsgEl = document.getElementById('inc-msg') as HTMLElement
+const healBtn = document.getElementById('heal') as HTMLButtonElement
+const incXBtn = document.getElementById('inc-x') as HTMLButtonElement
+const revealBtn = document.getElementById('reveal') as HTMLButtonElement
 
 function fmtTime(t: number): string {
   const d = new Date(t)
@@ -136,11 +151,40 @@ autoBox.addEventListener('change', () => {
   if (autoscroll) logEl.scrollTop = logEl.scrollHeight
 })
 
+// ---- incidents / self-heal ----
+revealBtn.addEventListener('click', () => window.dogfood.debug?.revealLogs?.())
+incXBtn.addEventListener('click', () => {
+  window.dogfood.debug?.dismissIncident?.()
+  incidentEl.hidden = true
+})
+healBtn.addEventListener('click', async () => {
+  healBtn.disabled = true
+  const r = await window.dogfood.debug?.heal?.()
+  if (r) {
+    healBtn.textContent = 'Prompt copied ✓'
+    setTimeout(() => {
+      healBtn.textContent = 'Heal'
+      healBtn.disabled = false
+    }, 1800)
+  } else {
+    healBtn.disabled = false
+  }
+})
+
 // ---- wire to main ----
 window.dogfood.debug?.onLine?.((e: Entry) => ingest(e))
 window.dogfood.debug?.onCleared?.(() => {
   entries.length = 0
   renderAll()
   refreshCount()
+})
+window.dogfood.debug?.onIncident?.((i) => {
+  incMsgEl.textContent = `[${i.source}] ${i.msg}`
+  incidentEl.hidden = false
+  healBtn.textContent = 'Heal'
+  healBtn.disabled = false
+})
+window.dogfood.debug?.onIncidentCleared?.(() => {
+  incidentEl.hidden = true
 })
 window.dogfood.debug?.ready?.()

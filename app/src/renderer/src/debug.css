@@ -105,6 +105,45 @@ body {
 .lvl-error .dbg-msg { color: #c4314b; }
 .lvl-error { background: rgba(196,49,75,.04); }
 
+/* ---- incident banner ---- */
+.dbg-incident {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 14px;
+  background: rgba(196,49,75,.06);
+  border-bottom: 1px solid rgba(196,49,75,.18);
+}
+.dbg-inc-glyph {
+  flex: none;
+  width: 20px; height: 20px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: #c4314b; color: #fff;
+  font-weight: 700; font-size: 13px; line-height: 1;
+}
+.dbg-inc-body { flex: 1; min-width: 0; }
+.dbg-inc-title { font-size: 12px; font-weight: 600; color: #c4314b; }
+.dbg-inc-msg {
+  font-family: var(--mono); font-size: 11px; color: var(--soft);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dbg-heal {
+  flex: none;
+  font-family: var(--font); font-size: 12px; font-weight: 600; color: #fff;
+  background: #c4314b; border: none; border-radius: 7px;
+  padding: 6px 14px; cursor: pointer;
+}
+.dbg-heal:hover { background: #a82942; }
+.dbg-heal:disabled { opacity: .7; cursor: default; }
+.dbg-inc-x {
+  flex: none;
+  background: none; border: none; cursor: pointer;
+  color: var(--label); font-size: 18px; line-height: 1; padding: 2px 4px;
+}
+.dbg-inc-x:hover { color: var(--ink); }
+
 /* ---- footer ---- */
 .dbg-foot {
   flex: none; height: 30px;
@@ -114,5 +153,10 @@ body {
   font-size: 11px; color: var(--label);
 }
 .dbg-spacer { flex: 1; }
+.dbg-link {
+  font-family: var(--font); font-size: 11px; color: var(--label);
+  background: none; border: none; cursor: pointer; padding: 0;
+}
+.dbg-link:hover { color: var(--ink); text-decoration: underline; }
 .dbg-auto { display: flex; align-items: center; gap: 5px; cursor: pointer; }
 .dbg-auto input { accent-color: var(--ink); }

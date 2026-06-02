@@ -29,6 +29,20 @@ const api = {
       const h = (): void => cb()
       ipcRenderer.on('debug:cleared', h)
       return () => ipcRenderer.removeListener('debug:cleared', h)
+    },
+    // self-heal
+    heal: () => ipcRenderer.invoke('debug:heal') as Promise<{ id: string; path: string; prompt: string } | null>,
+    dismissIncident: () => ipcRenderer.send('debug:dismiss-incident'),
+    revealLogs: () => ipcRenderer.invoke('debug:reveal-logs') as Promise<string>,
+    onIncident: (cb: (i: { id: string; level: string; source: string; msg: string }) => void) => {
+      const h = (_e: unknown, i: { id: string; level: string; source: string; msg: string }): void => cb(i)
+      ipcRenderer.on('debug:incident', h)
+      return () => ipcRenderer.removeListener('debug:incident', h)
+    },
+    onIncidentCleared: (cb: () => void) => {
+      const h = (): void => cb()
+      ipcRenderer.on('debug:incident-cleared', h)
+      return () => ipcRenderer.removeListener('debug:incident-cleared', h)
     }
   },
   pty: {

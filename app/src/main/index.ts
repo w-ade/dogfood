@@ -1,6 +1,6 @@
-import { app, BrowserWindow, ipcMain, dialog, shell, nativeImage, nativeTheme, globalShortcut } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, shell, nativeImage, nativeTheme, globalShortcut, clipboard } from 'electron'
 import { join, basename } from 'path'
-import { readdirSync, readFileSync, writeFileSync } from 'fs'
+import { readdirSync, readFileSync, writeFileSync, mkdirSync, createWriteStream, type WriteStream } from 'fs'
 import { execSync } from 'child_process'
 
 // ---- window size/position memory ----
@@ -41,6 +41,60 @@ const debugBuf: DebugEntry[] = []
 const DEBUG_MAX = 5000
 let debugWin: BrowserWindow | null = null
 
+// ---- persistence: one JSONL file per session, in userData/logs ----
+const logDir = join(app.getPath('userData'), 'logs')
+const incidentDir = join(app.getPath('userData'), 'incidents')
+let logStream: WriteStream | null = null
+let sessionLogPath = ''
+try {
+  mkdirSync(logDir, { recursive: true })
+  mkdirSync(incidentDir, { recursive: true })
+  sessionLogPath = join(logDir, `session-${Date.now()}.jsonl`)
+  logStream = createWriteStream(sessionLogPath, { flags: 'a' })
+} catch { /* noop — stream stays null, in-memory buffer still works */ }
+
+// ---- incidents: a detected breakage + its surrounding log context ----
+type Incident = { id: string; t: number; trigger: DebugEntry; context: DebugEntry[] }
+let activeIncident: Incident | null = null
+let lastBreakT = 0
+
+// What counts as "broken" for self-heal purposes.
+function isBreakage(e: DebugEntry): boolean {
+  return e.level === 'error'
+}
+
+function writeIncident(inc: Incident): void {
+  try {
+    writeFileSync(join(incidentDir, `${inc.id}.json`), JSON.stringify(inc, null, 2))
+    writeFileSync(join(incidentDir, 'latest.json'), JSON.stringify(inc, null, 2))
+  } catch { /* noop */ }
+}
+
+function emitIncident(inc: Incident): void {
+  if (debugWin && !debugWin.isDestroyed()) {
+    debugWin.webContents.send('debug:incident', {
+      id: inc.id, level: inc.trigger.level, source: inc.trigger.source, msg: inc.trigger.msg
+    })
+  }
+}
+
+// Fold rapid-fire errors (e.g. a render crash spewing lines) into one incident.
+function openIncident(trigger: DebugEntry): void {
+  const now = trigger.t
+  const context = debugBuf.slice(-25)
+  if (activeIncident && now - lastBreakT < 8000) {
+    activeIncident.context = context
+    lastBreakT = now
+    writeIncident(activeIncident)
+    emitIncident(activeIncident)
+    return
+  }
+  activeIncident = { id: `inc-${now}`, t: now, trigger, context }
+  lastBreakT = now
+  writeIncident(activeIncident)
+  emitIncident(activeIncident)
+}
+
 function fmtArg(a: unknown): string {
   if (typeof a === 'string') return a
   if (a instanceof Error) return a.stack || a.message
@@ -51,7 +105,9 @@ function dlog(level: string, source: string, msg: string): void {
   const entry: DebugEntry = { t: Date.now(), level, source, msg }
   debugBuf.push(entry)
   if (debugBuf.length > DEBUG_MAX) debugBuf.splice(0, debugBuf.length - DEBUG_MAX)
+  try { logStream?.write(JSON.stringify(entry) + '\n') } catch { /* noop */ }
   if (debugWin && !debugWin.isDestroyed()) debugWin.webContents.send('debug:line', entry)
+  if (isBreakage(entry)) openIncident(entry)
 }
 
 // Mirror main-process console output into the stream.
@@ -250,7 +306,7 @@ ipcMain.handle('pty:start', (e, { id, cols, rows }: { id: string; cols?: number;
   proc.onExit(({ exitCode }) => {
     win?.webContents.send('pty:exit', { id })
     ptys.delete(id)
-    dlog('info', 'pty', `exit ${id} (code ${exitCode})`)
+    dlog(exitCode ? 'error' : 'info', 'pty', `exit ${id} (code ${exitCode})`)
   })
   ptys.set(id, proc)
   dlog('info', 'pty', `start ${id} — ${shellPath} @ ${projectDir}`)
@@ -303,6 +359,33 @@ ipcMain.on('debug:emit', (_e, { level, source, msg }: { level?: string; source?:
 // Debug window finished loading — replay the buffered history into it.
 ipcMain.on('debug:ready', (e) => {
   for (const entry of debugBuf) e.sender.send('debug:line', entry)
+  if (activeIncident) emitIncident(activeIncident)
+})
+
+// Manual self-heal: write the incident report + copy a ready-to-paste prompt
+// pointing Claude Code at it. (When the live in-app terminal lands, this will
+// send the prompt straight into the running agent instead of the clipboard.)
+ipcMain.handle('debug:heal', () => {
+  if (!activeIncident) return null
+  const path = join(incidentDir, `${activeIncident.id}.json`)
+  const prompt =
+    `The Dogfood app hit a runtime error.\n\n` +
+    `Read the incident report at:\n${path}\n\n` +
+    `It contains the failing event and the surrounding log context. ` +
+    `Diagnose the root cause and fix it.`
+  try { clipboard.writeText(prompt) } catch { /* noop */ }
+  dlog('system', 'system', `heal requested for ${activeIncident.id} — prompt copied to clipboard`)
+  return { id: activeIncident.id, path, prompt }
+})
+
+ipcMain.on('debug:dismiss-incident', () => {
+  activeIncident = null
+  if (debugWin && !debugWin.isDestroyed()) debugWin.webContents.send('debug:incident-cleared')
+})
+
+ipcMain.handle('debug:reveal-logs', () => {
+  if (sessionLogPath) shell.showItemInFolder(sessionLogPath)
+  return sessionLogPath
 })
 
 ipcMain.on('debug:clear', () => {

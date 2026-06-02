@@ -16,6 +16,11 @@ interface Window {
       toggle: () => void
       onLine: (cb: (e: { t: number; level: string; source: string; msg: string }) => void) => () => void
       onCleared: (cb: () => void) => () => void
+      heal: () => Promise<{ id: string; path: string; prompt: string } | null>
+      dismissIncident: () => void
+      revealLogs: () => Promise<string>
+      onIncident: (cb: (i: { id: string; level: string; source: string; msg: string }) => void) => () => void
+      onIncidentCleared: (cb: () => void) => () => void
     }
     pty: {
       start: (id: string, opts: { cols?: number; rows?: number }) => Promise<boolean>
