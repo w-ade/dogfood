@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="cowboy.svg" />
 <title>Dogfood — UI Gallery</title>
 <style>
   :root{
@@ -43,8 +44,7 @@
   /* topbar */
   .topbar{height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 14px 0 86px;background:rgba(245,245,247,.9);border-bottom:1px solid var(--hairline)}
   .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
-  .topbar .bmark{width:22px;height:22px;border-radius:7px;background:var(--ink);display:grid;place-items:center}
-  .topbar .bmark svg{width:13px;height:13px}
+  .topbar .bmark{width:22px;height:22px;display:block}
   .focus{margin:0 auto;display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;background:var(--surface);border:1px solid var(--hairline);padding:6px 14px;border-radius:var(--r-pill);box-shadow:var(--shadow-sm)}
   .focus.empty{color:var(--gray);font-weight:500}
   .focus .kbd{font-size:10px;color:var(--gray2);border:1px solid var(--hairline);border-radius:5px;padding:1px 5px}
@@ -147,7 +147,7 @@
   <div class="frame">
     <div class="traffic"><i class="r"></i><i class="y"></i><i class="g"></i></div>
     <div class="topbar">
-      <div class="brand"><span class="bmark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8c0-1 1-2 3-2s3 1 3 2M13 8c0-1 1-2 3-2s3 1 3 2M4 12h16c0 4-3 7-8 7s-8-3-8-7Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span>dogfood</div>
+      <div class="brand"><img class="bmark" src="cowboy.svg" alt="Cowboy">dogfood</div>
       <div class="focus">Button.tsx <span class="kbd">⌘P</span></div>
       <div class="actions">
         <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
@@ -197,7 +197,7 @@
   <div class="frame sm">
     <div class="traffic"><i class="r"></i><i class="y"></i><i class="g"></i></div>
     <div class="topbar">
-      <div class="brand"><span class="bmark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8c0-1 1-2 3-2s3 1 3 2M13 8c0-1 1-2 3-2s3 1 3 2M4 12h16c0 4-3 7-8 7s-8-3-8-7Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span>dogfood</div>
+      <div class="brand"><img class="bmark" src="cowboy.svg" alt="Cowboy">dogfood</div>
       <div class="focus empty">Pick a component <span class="kbd">⌘P</span></div>
       <div class="actions">
         <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
@@ -227,7 +227,7 @@
       <p class="label">Top bar</p>
       <div class="panelbox" style="width:560px;max-width:100%">
         <div class="topbar" style="background:var(--page)">
-          <div class="brand"><span class="bmark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8c0-1 1-2 3-2s3 1 3 2M13 8c0-1 1-2 3-2s3 1 3 2M4 12h16c0 4-3 7-8 7s-8-3-8-7Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span>dogfood</div>
+          <div class="brand"><img class="bmark" src="cowboy.svg" alt="Cowboy">dogfood</div>
           <div class="focus">Button.tsx <span class="kbd">⌘P</span></div>
           <div class="actions">
             <button class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>

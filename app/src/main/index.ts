@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, shell, nativeImage } from 'electron'
 import { join, basename } from 'path'
 import { readdirSync, readFileSync, writeFileSync } from 'fs'
 import { execSync } from 'child_process'
@@ -66,6 +66,13 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  // Cowboy in the dock (dev)
+  if (process.platform === 'darwin') {
+    try {
+      const icon = nativeImage.createFromPath(join(__dirname, '../../build/icon.png'))
+      if (!icon.isEmpty()) app.dock?.setIcon(icon)
+    } catch { /* noop */ }
+  }
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

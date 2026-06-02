@@ -44,8 +44,7 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; col
   -webkit-app-region: drag;
 }
 .topbar .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
-.topbar .mark { width: 22px; height: 22px; border-radius: 7px; background: var(--ink); display: grid; place-items: center; }
-.topbar .mark svg { width: 13px; height: 13px; }
+.topbar .mark { width: 23px; height: 23px; display: block; }
 .topbar .focus {
   -webkit-app-region: no-drag;
   margin: 0 auto; display: flex; align-items: center; gap: 8px;

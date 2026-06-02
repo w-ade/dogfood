@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Terminal from './Terminal'
 import FloatingWindow from './FloatingWindow'
+import cowboy from './assets/cowboy.svg'
 
 type Project = { path: string; name: string }
 type Activity = { hash: string; subject: string; when: string; current: boolean }
@@ -71,7 +72,7 @@ export default function App(): JSX.Element {
     <div className="app">
       {/* ---------- top bar ---------- */}
       <div className="topbar">
-        <div className="brand"><span className="mark">{I.dog}</span>dogfood</div>
+        <div className="brand"><img className="mark" src={cowboy} alt="Cowboy" />dogfood</div>
 
         <button className={`focus ${focus ? '' : 'empty'}`} onClick={openPalette}>
           {focus ? base(focus) : 'Pick a component'}

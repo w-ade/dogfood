@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="cowboy.svg" />
 <title>Dogfood — Interactive Docs</title>
 <style>
   :root{
@@ -192,6 +193,15 @@
 
   .footer{max-width:980px;margin:30px auto 0;padding:0 24px;color:var(--gray2);font-size:13px;text-align:center}
   .galleryframe{width:100%;height:80vh;border:1px solid var(--hairline);border-radius:16px;background:var(--surface);box-shadow:var(--shadow-sm)}
+  .brand-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:560px}
+  .brand-cell{border-radius:var(--r-card);box-shadow:var(--shadow-sm);border:1px solid var(--hairline);padding:36px;display:grid;place-items:center;gap:18px}
+  .brand-cap{font-size:12px;font-weight:600;color:var(--gray)}
+  .brand-do{list-style:none;margin-top:8px;display:grid;gap:9px;max-width:62ch}
+  .brand-do li{display:flex;align-items:flex-start;gap:10px;font-size:14.5px;color:var(--ink)}
+  .brand-do .bd{width:8px;height:8px;border-radius:50%;margin-top:7px;flex:none}
+  .brand-do .bd.ok{background:var(--green)} .brand-do .bd.no{background:#FF3B30}
+  .dl{font-size:13px;font-weight:600;color:var(--blue);background:var(--blue-bg);padding:9px 14px;border-radius:var(--r-pill);text-decoration:none}
+  .dl:hover{filter:brightness(.97)}
   @media(max-width:680px){
     nav.tabs{display:none}
     .loop{grid-template-columns:1fr}
@@ -217,6 +227,7 @@
       <button data-tab="decisions">Decisions</button>
       <button data-tab="architecture">Architecture</button>
       <button data-tab="design">Design</button>
+      <button data-tab="branding">Branding</button>
       <button data-tab="gallery">Gallery</button>
     </nav>
   </div>
@@ -399,6 +410,59 @@
       <div class="r"><div style="border-radius:16px"></div><span>md · 16</span></div>
       <div class="r"><div style="border-radius:12px"></div><span>sm · 12</span></div>
       <div class="r"><div style="border-radius:999px"></div><span>pill · ∞</span></div>
+    </div>
+  </section>
+</div>
+
+<!-- ===================== BRANDING ===================== -->
+<div class="panel" id="branding">
+  <section>
+    <div class="eyebrow">The mark</div>
+    <h2>Branding</h2>
+    <p class="muted" style="margin-bottom:22px">Meet <b>Cowboy</b> — the good boy behind the name, and the face of Dogfood. The logomark is a clean app-icon squircle of Cowboy; the wordmark is lowercase <b>dogfood</b> in SF&nbsp;Pro.</p>
+
+    <div class="brand-grid">
+      <div class="brand-cell" style="background:var(--surface)">
+        <img src="cowboy.svg" width="148" height="148" alt="Cowboy logomark" />
+        <div class="brand-cap">Primary · on light</div>
+      </div>
+      <div class="brand-cell" style="background:var(--ink)">
+        <img src="cowboy-inverse.svg" width="148" height="148" alt="Cowboy logomark, inverse" />
+        <div class="brand-cap" style="color:var(--gray2)">Inverse · on dark</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:32px">Wordmark</h3>
+    <div style="font-size:46px;font-weight:700;letter-spacing:-.03em;margin:6px 0 4px">dogfood</div>
+    <p class="muted">SF Pro (<code>-apple-system</code>) · 700 · lowercase · tracking −0.03em · ink #1C1C1C.</p>
+
+    <h3 style="margin-top:28px">Lockup</h3>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:8px">
+      <img src="cowboy.svg" width="56" height="56" alt="" />
+      <span style="font-size:40px;font-weight:700;letter-spacing:-.03em">dogfood</span>
+    </div>
+    <p class="muted" style="margin-top:10px">Mark height ≈ 1.4× the wordmark's lowercase height. Keep clear space ≥ the mark's corner radius on every side.</p>
+
+    <h3 style="margin-top:30px">Color</h3>
+    <div class="swatches" style="max-width:600px">
+      <div class="sw"><div class="chip2" style="background:#1C1C1C"></div><div class="meta"><b>Ink (mark)</b><span>#1C1C1C</span></div></div>
+      <div class="sw"><div class="chip2" style="background:#FFFFFF;border-bottom:1px solid var(--hairline)"></div><div class="meta"><b>Surface</b><span>#FFFFFF</span></div></div>
+      <div class="sw"><div class="chip2" style="background:#007AFF"></div><div class="meta"><b>Blue</b><span>#007AFF</span></div></div>
+      <div class="sw"><div class="chip2" style="background:#34C759"></div><div class="meta"><b>Green</b><span>#34C759</span></div></div>
+    </div>
+
+    <h3 style="margin-top:14px">Usage</h3>
+    <ul class="brand-do">
+      <li><span class="bd ok"></span><span><b>Primary</b> mark on light surfaces, <b>inverse</b> on dark — both are self-contained.</span></li>
+      <li><span class="bd ok"></span>Keep the squircle corners (medium radius) — they're tuned to sit beside the wordmark.</li>
+      <li><span class="bd no"></span>Don't recolor Cowboy, stretch him, rotate him, or add effects.</li>
+      <li><span class="bd no"></span>Don't put the dark mark on a dark background — reach for the inverse.</li>
+    </ul>
+
+    <h3 style="margin-top:26px">Files</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="dl" href="cowboy.svg" download>cowboy.svg ↓</a>
+      <a class="dl" href="cowboy-inverse.svg" download>cowboy-inverse.svg ↓</a>
     </div>
   </section>
 </div>
