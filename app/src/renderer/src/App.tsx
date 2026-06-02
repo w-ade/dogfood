@@ -72,12 +72,14 @@ export default function App(): JSX.Element {
   const applyTheme = useCallback((m: 'light' | 'dark') => {
     setTheme(m)
     document.documentElement.dataset.theme = m
-    window.dogfood.theme.set(m)
+    window.dogfood.theme?.set?.(m)
   }, [])
   useEffect(() => {
     const saved = localStorage.getItem('dogfood-theme') as 'light' | 'dark' | null
-    if (saved) applyTheme(saved)
-    else window.dogfood.theme.get().then((dark) => applyTheme(dark ? 'dark' : 'light'))
+    if (saved) { applyTheme(saved); return }
+    const g = window.dogfood.theme?.get?.()
+    if (g) g.then((dark) => applyTheme(dark ? 'dark' : 'light'))
+    else applyTheme('light')
   }, [applyTheme])
   const toggleTheme = (): void => {
     const next = theme === 'dark' ? 'light' : 'dark'

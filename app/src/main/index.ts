@@ -202,6 +202,11 @@ ipcMain.handle('shell:reveal', (_e, p: string) => {
 
 ipcMain.handle('theme:set', (_e, mode: 'light' | 'dark' | 'system') => {
   nativeTheme.themeSource = mode
+  // re-apply vibrancy so its tint re-evaluates against the new appearance
+  if (win && process.platform === 'darwin') {
+    win.setVibrancy(null)
+    win.setVibrancy('under-window')
+  }
   return nativeTheme.shouldUseDarkColors
 })
 
