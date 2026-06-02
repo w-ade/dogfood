@@ -55,7 +55,7 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; col
 }
 .topbar .focus.empty { color: var(--gray); font-weight: 500; }
 .topbar .focus .kbd { font-size: 10px; color: var(--gray2); border: 1px solid var(--hairline); border-radius: 5px; padding: 1px 5px; }
-.topbar .actions { -webkit-app-region: no-drag; display: flex; align-items: center; gap: 2px; }
+.topbar .actions { -webkit-app-region: no-drag; margin-left: auto; display: flex; align-items: center; gap: 2px; }
 .iconbtn {
   width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center;
   color: var(--gray); transition: all .15s;

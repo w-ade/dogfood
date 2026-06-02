@@ -125,11 +125,6 @@ export default function App(): JSX.Element {
       <div className="topbar">
         <div className="brand"><img className="mark" src={theme === 'dark' ? cowboyInverse : cowboy} alt="Cowboy" />dogfood</div>
 
-        <button className={`focus ${focus ? '' : 'empty'}`} onClick={openPalette}>
-          {focus ? base(focus) : 'Pick a component'}
-          <span className="kbd">⌘P</span>
-        </button>
-
         <div className="actions">
           <button className="iconbtn" title="Open project (⌘O)" onClick={openProject}>{I.folder}</button>
           <button className="iconbtn" title="Find component (⌘P)" onClick={openPalette}>{I.search}</button>
@@ -156,12 +151,6 @@ export default function App(): JSX.Element {
           )}
 
           {/* floating controls */}
-          <button className="statuspill" onClick={() => setTerminalOpen((v) => !v)}>
-            <span className={`dot ${terminalOpen ? 'run' : ''}`} />
-            {terminalOpen ? 'Terminal' : 'claude'}
-            <span className="sub">· {project ? project.name : 'no project'}</span>
-          </button>
-
           <div className="zoom">
             <button onClick={() => setZoom((z) => Math.max(25, z - 10))}>−</button>
             <span>{zoom}%</span>

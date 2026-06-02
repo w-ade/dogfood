@@ -50,7 +50,7 @@ export default function DialPanel({
   return (
     <div className={`dialpanel ${open ? 'open' : ''} ${resizing ? 'resizing' : ''}`} style={{ width: w }}>
       <div className="dialpanel-resize" onMouseDown={startResize} title="Drag to resize" />
-      <Folder title="claude — terminal" defaultOpen>
+      <Folder title="" defaultOpen>
         <div className="dialpanel-term">
           <Terminal projectKey={projectKey} theme={theme} />
         </div>
