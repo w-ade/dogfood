@@ -145,7 +145,7 @@ function createDebugWindow(): void {
     show: false,
     title: 'Dogfood — Debug',
     titleBarStyle: 'hiddenInset',
-    trafficLightPosition: { x: 13, y: 16 },
+    trafficLightPosition: { x: 12, y: 8 },
     backgroundColor: '#ffffff',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

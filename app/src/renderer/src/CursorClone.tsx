@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Terminal from './Terminal'
+import Stepper from './Stepper'
 import cowboyDark from './assets/cowboy.svg'
 import cowboyLight from './assets/cowboy-inverse.svg'
 
@@ -51,6 +52,7 @@ export default function CursorClone(): JSX.Element {
     window.dogfood?.theme?.set?.(theme)
   }, [theme])
 
+  const [canvasComp] = useState<'stepper' | null>('stepper')
   const [panelW, setPanelW] = useState(420)
   const [collapsed, setCollapsed] = useState(false)
   const [termSeq, setTermSeq] = useState(0) // bump to kill + respawn the terminal
@@ -95,19 +97,23 @@ export default function CursorClone(): JSX.Element {
       {/* body: canvas + right terminal panel */}
       <div className="cc-main">
         <div className="cc-editor">
-          <div className="cc-welcome">
-            <img className="cc-logo" src={theme === 'dark' ? cowboyLight : cowboyDark} alt="" />
-            <div className="cc-shortcuts">
-              {shortcuts.map(([label, keys]) => (
-                <div className="cc-sc" key={label}>
-                  <span className="cc-sc-label">{label}</span>
-                  <span className="cc-sc-keys">
-                    {keys.map((k, i) => <span className="cc-key" key={i}>{k}</span>)}
-                  </span>
-                </div>
-              ))}
+          {canvasComp === 'stepper' ? (
+            <Stepper />
+          ) : (
+            <div className="cc-welcome">
+              <img className="cc-logo" src={theme === 'dark' ? cowboyLight : cowboyDark} alt="" />
+              <div className="cc-shortcuts">
+                {shortcuts.map(([label, keys]) => (
+                  <div className="cc-sc" key={label}>
+                    <span className="cc-sc-label">{label}</span>
+                    <span className="cc-sc-keys">
+                      {keys.map((k, i) => <span className="cc-key" key={i}>{k}</span>)}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Panel stays mounted when hidden so the live terminal session survives a toggle. */}
