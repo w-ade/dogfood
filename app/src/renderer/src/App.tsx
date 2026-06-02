@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import DialPanel from './DialPanel'
-import cowboy from './assets/cowboy.svg'
-import cowboyInverse from './assets/cowboy-inverse.svg'
+import TestComponent from './TestComponent'
 
 type Project = { path: string; name: string }
 type Activity = { hash: string; subject: string; when: string; current: boolean }
+type Box = { x: number; y: number; w: number; h: number }
 
 // ---- tiny inline icon set (thin-stroke, rounded) ----
 const I = {
@@ -37,6 +37,9 @@ export default function App(): JSX.Element {
   const [bg, setBg] = useState<'grid' | 'plain' | 'dark'>('grid')
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [selectMode, setSelectMode] = useState(false)
+  const canvasRef = useRef<HTMLDivElement>(null)
+  const [hoverBox, setHoverBox] = useState<Box | null>(null)
+  const [selBox, setSelBox] = useState<(Box & { label: string }) | null>(null)
   const [zoom, setZoom] = useState(100)
   const [drawerH, setDrawerH] = useState(300)
   const [isResizing, setIsResizing] = useState(false)
@@ -90,6 +93,28 @@ export default function App(): JSX.Element {
     applyTheme(next)
   }
 
+  // pointer (element select) tool — works on the in-canvas test component.
+  // Show a brief On/Off flash on toggle instead of a persistent hint.
+  const [pointerToast, setPointerToast] = useState<string | null>(null)
+  const pointerMounted = useRef(true)
+  useEffect(() => {
+    if (!selectMode) { setHoverBox(null); setSelBox(null) }
+    if (pointerMounted.current) { pointerMounted.current = false; return }
+    setPointerToast(selectMode ? 'On' : 'Off')
+    const t = setTimeout(() => setPointerToast(null), 1100)
+    return () => clearTimeout(t)
+  }, [selectMode])
+  const boxOf = (el: Element): Box => {
+    const c = canvasRef.current?.getBoundingClientRect()
+    const r = el.getBoundingClientRect()
+    return { x: r.left - (c?.left ?? 0), y: r.top - (c?.top ?? 0), w: r.width, h: r.height }
+  }
+  const labelOf = (el: Element): string => {
+    const tag = `<${el.tagName.toLowerCase()}>`
+    const txt = el.textContent?.trim().replace(/\s+/g, ' ').slice(0, 18) || ''
+    return txt ? `${tag} ${txt}` : tag
+  }
+
   const refreshActivity = useCallback(() => {
     window.dogfood.activity().then(setActivity)
   }, [])
@@ -125,32 +150,44 @@ export default function App(): JSX.Element {
     <div className="app">
       {/* ---------- top bar ---------- */}
       <div className="topbar">
-        <div className="brand"><img className="mark" src={theme === 'dark' ? cowboyInverse : cowboy} alt="Cowboy" />dogfood</div>
+        <div className="brand">dogfood</div>
 
         <div className="actions">
           <button className={`iconbtn ${selectMode ? 'on' : ''}`} title="Select element" onClick={() => setSelectMode((v) => !v)}>{I.pointer}</button>
           <button className="iconbtn" title="Open project (⌘O)" onClick={openProject}>{I.folder}</button>
-          <button className="iconbtn" title="Find component (⌘P)" onClick={openPalette}>{I.search}</button>
-          <button className={`iconbtn ${activityOpen ? 'on' : ''}`} title="Activity (⌘E)"
-            onClick={() => setActivityOpen((v) => { const n = !v; if (n) refreshActivity(); return n })}>{I.activity}</button>
-          <button className={`iconbtn ${terminalOpen ? 'on' : ''}`} title="Terminal (⌘J)"
-            onClick={() => setTerminalOpen((v) => !v)}>{I.panel}</button>
+          <div className="tabgroup">
+            <button className="tab" title="Find component (⌘P)" onClick={openPalette}>{I.search}</button>
+            <button className={`tab ${activityOpen ? 'on' : ''}`} title="Activity (⌘E)"
+              onClick={() => setActivityOpen((v) => { const n = !v; if (n) refreshActivity(); return n })}>{I.activity}</button>
+            <button className={`tab ${terminalOpen ? 'on' : ''}`} title="Terminal (⌘J)"
+              onClick={() => setTerminalOpen((v) => !v)}>{I.panel}</button>
+          </div>
           <button className="iconbtn" title="Toggle light / dark" onClick={toggleTheme}>{theme === 'dark' ? I.sun : I.moon}</button>
         </div>
       </div>
 
       {/* ---------- body ---------- */}
       <div className="body">
-        <div className={`canvas bg-${bg} ${selectMode ? 'selecting' : ''}`}>
-          {selectMode && <div className="select-hint">{I.pointer} Click an element to edit it</div>}
-          {focus && (
-            <div className="artboard" style={{ transform: `scale(${zoom / 100})` }}>
-              <div className="empty">
-                <div className="big">{I.file}</div>
-                <h2>{base(focus)}</h2>
-                <p>{focus}</p>
-                <p style={{ marginTop: 10, color: 'var(--gray2)' }}>Live render wires up next — open the terminal and type <b>claude</b> to start building it.</p>
-              </div>
+        <div ref={canvasRef} className={`canvas bg-${bg} ${selectMode ? 'selecting' : ''}`}>
+          {pointerToast && <div className="select-hint">{I.pointer} Pointer {pointerToast}</div>}
+
+          <div className="artboard" style={{ transform: `scale(${zoom / 100})` }}>
+            <div
+              className="preview-root"
+              onMouseOver={selectMode ? (e) => setHoverBox(boxOf(e.target as Element)) : undefined}
+              onMouseLeave={selectMode ? () => setHoverBox(null) : undefined}
+              onClickCapture={selectMode ? (e) => { e.preventDefault(); e.stopPropagation(); const t = e.target as Element; setSelBox({ ...boxOf(t), label: labelOf(t) }) } : undefined}
+            >
+              <TestComponent />
+            </div>
+          </div>
+
+          {selectMode && hoverBox && (
+            <div className="pick-outline hover" style={{ left: hoverBox.x, top: hoverBox.y, width: hoverBox.w, height: hoverBox.h }} />
+          )}
+          {selectMode && selBox && (
+            <div className="pick-outline selected" style={{ left: selBox.x, top: selBox.y, width: selBox.w, height: selBox.h }}>
+              <span className="pick-label">{selBox.label}</span>
             </div>
           )}
 
