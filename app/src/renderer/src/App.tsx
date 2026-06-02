@@ -16,6 +16,7 @@ const I = {
   panel: <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" strokeWidth="2"/><path d="M15 4v16" stroke="currentColor" strokeWidth="2"/></svg>,
   chevDown: <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
   chevLeft: <svg viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  pointer: <svg viewBox="0 0 24 24" fill="none"><path d="M5 3l6.4 15.6 2.2-6.3 6.3-2.2L5 3z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/></svg>,
   sun: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
   moon: <svg viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>,
   file: <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/><path d="M13 3v5h5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>,
@@ -35,6 +36,7 @@ export default function App(): JSX.Element {
   const [terminalOpen, setTerminalOpen] = useState(false)
   const [bg, setBg] = useState<'grid' | 'plain' | 'dark'>('grid')
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [selectMode, setSelectMode] = useState(false)
   const [zoom, setZoom] = useState(100)
   const [drawerH, setDrawerH] = useState(300)
   const [isResizing, setIsResizing] = useState(false)
@@ -126,6 +128,7 @@ export default function App(): JSX.Element {
         <div className="brand"><img className="mark" src={theme === 'dark' ? cowboyInverse : cowboy} alt="Cowboy" />dogfood</div>
 
         <div className="actions">
+          <button className={`iconbtn ${selectMode ? 'on' : ''}`} title="Select element" onClick={() => setSelectMode((v) => !v)}>{I.pointer}</button>
           <button className="iconbtn" title="Open project (⌘O)" onClick={openProject}>{I.folder}</button>
           <button className="iconbtn" title="Find component (⌘P)" onClick={openPalette}>{I.search}</button>
           <button className={`iconbtn ${activityOpen ? 'on' : ''}`} title="Activity (⌘E)"
@@ -138,7 +141,8 @@ export default function App(): JSX.Element {
 
       {/* ---------- body ---------- */}
       <div className="body">
-        <div className={`canvas bg-${bg}`}>
+        <div className={`canvas bg-${bg} ${selectMode ? 'selecting' : ''}`}>
+          {selectMode && <div className="select-hint">{I.pointer} Click an element to edit it</div>}
           {focus && (
             <div className="artboard" style={{ transform: `scale(${zoom / 100})` }}>
               <div className="empty">

@@ -288,3 +288,15 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; col
 .dialpanel-resize:hover::after, .dialpanel.resizing .dialpanel-resize::after { background: var(--blue); width: 2px; }
 .dialpanel-term { height: 320px; }
 .dialpanel-term .term-wrap { height: 100%; }
+
+/* ---------------- select (pointer) mode ---------------- */
+.canvas.selecting { cursor: crosshair; }
+.select-hint {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 6;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--surface); border: 1px solid var(--hairline); box-shadow: var(--shadow);
+  padding: 7px 13px; border-radius: var(--r-pill); font-size: 12.5px; font-weight: 600; color: var(--ink);
+  -webkit-backdrop-filter: saturate(180%) blur(26px); backdrop-filter: saturate(180%) blur(26px);
+  animation: dialpop .18s ease;
+}
+.select-hint svg { width: 14px; height: 14px; color: var(--blue); }
