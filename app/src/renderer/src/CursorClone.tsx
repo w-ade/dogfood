@@ -20,6 +20,7 @@ const Close = <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18
 const ActivityLog = <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3 8.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/><path d="M3 4.5v4h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 8v4.2l2.8 1.6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
 const Sun = <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.7"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></svg>
 const Moon = <svg viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/></svg>
+const Bolt = <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round"/></svg>
 
 const shortcuts: [string, string[]][] = [
   ['Hide Terminal', ['⌘', 'J']],
@@ -71,7 +72,7 @@ export default function CursorClone(): JSX.Element {
         <div className="cc-titleright">
           <button className={`cc-ic cc-toggle ${collapsed ? '' : 'on'}`} title="Terminal panel" onClick={() => setCollapsed((c) => !c)}>{PanelRight}</button>
           <button className="cc-ic cc-gear" title="Toggle light / dark" onClick={toggle}>{theme === 'dark' ? Sun : Moon}</button>
-          <span className="cc-ic" title="Settings">{Gear}</span>
+          <span className="cc-ic" title="Settings">{Bolt}</span>
         </div>
       </div>
 
