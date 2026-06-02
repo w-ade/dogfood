@@ -17,6 +17,8 @@ const I = {
   chevDown: <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
   chevLeft: <svg viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
   pointer: <svg viewBox="0 0 24 24" fill="none"><path d="M5 3l6.4 15.6 2.2-6.3 6.3-2.2L5 3z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/></svg>,
+  gear: <svg viewBox="0 0 24 24" fill="none"><path d="M19.4 13a7.8 7.8 0 0 0 0-2l2-1.5-2-3.4-2.3 1a7.6 7.6 0 0 0-1.7-1l-.3-2.6h-4l-.3 2.6a7.6 7.6 0 0 0-1.7 1l-2.3-1-2 3.4L4.6 11a7.8 7.8 0 0 0 0 2l-2 1.5 2 3.4 2.3-1a7.6 7.6 0 0 0 1.7 1l.3 2.6h4l.3-2.6a7.6 7.6 0 0 0 1.7-1l2.3 1 2-3.4-2-1.5Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><circle cx="12" cy="12" r="2.6" stroke="currentColor" strokeWidth="1.6"/></svg>,
+  splitPanel: <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" strokeWidth="2"/><path d="M14 4v16" stroke="currentColor" strokeWidth="2"/></svg>,
   sun: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
   moon: <svg viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>,
   file: <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h7l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/><path d="M13 3v5h5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>,
@@ -151,18 +153,19 @@ export default function App(): JSX.Element {
       {/* ---------- top bar ---------- */}
       <div className="topbar">
         <div className="brand">dogfood</div>
-
-        <div className="actions">
+        <div className="tools">
           <button className={`iconbtn ${selectMode ? 'on' : ''}`} title="Select element" onClick={() => setSelectMode((v) => !v)}>{I.pointer}</button>
           <button className="iconbtn" title="Open project (⌘O)" onClick={openProject}>{I.folder}</button>
-          <div className="tabgroup">
-            <button className="tab" title="Find component (⌘P)" onClick={openPalette}>{I.search}</button>
-            <button className={`tab ${activityOpen ? 'on' : ''}`} title="Activity (⌘E)"
-              onClick={() => setActivityOpen((v) => { const n = !v; if (n) refreshActivity(); return n })}>{I.activity}</button>
-            <button className={`tab ${terminalOpen ? 'on' : ''}`} title="Terminal (⌘J)"
-              onClick={() => setTerminalOpen((v) => !v)}>{I.panel}</button>
-          </div>
-          <button className="iconbtn" title="Toggle light / dark" onClick={toggleTheme}>{theme === 'dark' ? I.sun : I.moon}</button>
+          <button className="iconbtn" title="Find component (⌘P)" onClick={openPalette}>{I.search}</button>
+        </div>
+
+        <div className="corner">
+          <button className={`cbtn ${activityOpen ? 'on' : ''}`} title="Activity (⌘E)"
+            onClick={() => setActivityOpen((v) => { const n = !v; if (n) refreshActivity(); return n })}>{I.activity}</button>
+          <button className={`cbtn ${terminalOpen ? 'on' : ''}`} title="Terminal panel (⌘J)"
+            onClick={() => setTerminalOpen((v) => !v)}>{I.panel}</button>
+          <button className="cbtn" title="Toggle light / dark" onClick={toggleTheme}>{theme === 'dark' ? I.sun : I.moon}</button>
+          <button className="cbtn" title="Settings">{I.gear}</button>
         </div>
       </div>
 

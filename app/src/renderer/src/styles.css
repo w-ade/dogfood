@@ -315,3 +315,11 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; col
 .pick-outline.hover { border: 1.5px solid rgba(0,122,255,.45); background: rgba(0,122,255,.06); }
 .pick-outline.selected { border: 2px solid var(--blue); box-shadow: 0 0 0 1px rgba(255,255,255,.4); }
 .pick-label { position: absolute; top: -19px; left: -2px; background: var(--blue); color: #fff; font-size: 10.5px; font-weight: 600; padding: 2px 7px; border-radius: 5px; white-space: nowrap; font-family: var(--mono); }
+
+/* ---------------- top bar: left tools + Cursor-style corner cluster ---------------- */
+.topbar .tools { -webkit-app-region: no-drag; display: flex; align-items: center; gap: 2px; margin-left: 10px; }
+.topbar .corner { -webkit-app-region: no-drag; margin-left: auto; display: flex; align-items: center; gap: 1px; }
+.corner .cbtn { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: var(--gray2); transition: all .15s; }
+.corner .cbtn:hover { background: var(--card); color: var(--ink); }
+.corner .cbtn.on { background: var(--card); color: var(--ink); }
+.corner .cbtn svg { width: 17px; height: 17px; }
