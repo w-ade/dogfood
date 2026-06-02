@@ -43,6 +43,7 @@ export default function CursorClone(): JSX.Element {
     })
 
   const [panelH, setPanelH] = useState(280)
+  const [collapsed, setCollapsed] = useState(false)
   const resizing = useRef(false)
   const startResize = (e: React.MouseEvent): void => {
     e.preventDefault()
@@ -94,8 +95,8 @@ export default function CursorClone(): JSX.Element {
       </div>
 
       {/* bottom panel */}
-      <div className="cc-panel" style={{ height: panelH }}>
-        <div className="cc-panel-resize" onMouseDown={startResize} />
+      <div className="cc-panel" style={{ height: collapsed ? undefined : panelH }}>
+        {!collapsed && <div className="cc-panel-resize" onMouseDown={startResize} />}
         <div className="cc-panel-head">
           <div className="cc-tabs">
             {tabs.map((t) => (
@@ -103,25 +104,21 @@ export default function CursorClone(): JSX.Element {
             ))}
           </div>
           <div className="cc-panel-ctrls">
-            <span className="cc-agent"><span className="cc-inf">∞</span> Agent Terminal</span>
-            <span className="cc-plus">{sc(Plus)}<span className="cc-cd">{ChevDown}</span></span>
-            {sc(Split)}
-            {sc(Trash)}
-            {sc(More)}
-            {sc(ChevUp)}
-            {sc(Close)}
+            <button className="cc-ic cc-toggle" title={collapsed ? 'Show terminal' : 'Hide terminal'} onClick={() => setCollapsed((c) => !c)}>
+              {collapsed ? ChevUp : ChevDown}
+            </button>
           </div>
         </div>
 
-        <div className="cc-term">
-          <div className="cc-term-line">
-            <span className="cc-dot" />
-            <span><span className="cc-prompt">$</span> npx tsc --noEmit 2&gt;&amp;1</span>
+        {!collapsed && (
+          <div className="cc-term">
+            <div className="cc-term-line">
+              <span className="cc-dot" />
+              <span><span className="cc-prompt">$</span> npx tsc --noEmit 2&gt;&amp;1</span>
+            </div>
+            <div className="cc-cursor" />
           </div>
-          <div className="cc-cursor" />
-        </div>
-
-        <div className="cc-readonly">Agent terminals are read-only</div>
+        )}
       </div>
 
       {/* status bar */}
