@@ -20,7 +20,7 @@ const Close = <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18
 const ActivityLog = <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3 8.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/><path d="M3 4.5v4h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 8v4.2l2.8 1.6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
 const Sun = <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.7"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></svg>
 const Moon = <svg viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/></svg>
-const Bolt = <svg viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M3 12 7.5 4.2H16.5L21 12l-4.5 7.8H7.5L3 12Zm9-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg>
+const Bolt = <svg viewBox="0 0 24 24" fill="none"><path d="M3 12 7.5 4.2H16.5L21 12l-4.5 7.8H7.5L3 12Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" strokeWidth="1.7"/></svg>
 
 const shortcuts: [string, string[]][] = [
   ['Hide Terminal', ['⌘', 'J']],
