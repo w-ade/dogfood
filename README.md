@@ -20,7 +20,7 @@ dogfood/
 The interactive hub — concept, decisions, architecture, the visual system, and the full
 **component inventory** (current + future) — is a single self-contained `index.html`.
 
-**Live:** https://wwwwaaaaddddeeee.github.io/dogfood/ (GitHub Pages, served from the repo root)
+**Live:** https://w-ade.github.io/dogfood/ (GitHub Pages, served from the repo root)
 
 To update it: edit `index.html`, commit, push — Pages rebuilds in ~30s.
 
