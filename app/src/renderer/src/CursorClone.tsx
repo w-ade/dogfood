@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Terminal from './Terminal'
+import Canvas from './Canvas'
 import Stepper from './Stepper'
 import cowboyDark from './assets/cowboy.svg'
 import cowboyLight from './assets/cowboy-inverse.svg'
@@ -52,7 +53,7 @@ export default function CursorClone(): JSX.Element {
     window.dogfood?.theme?.set?.(theme)
   }, [theme])
 
-  const [canvasComp] = useState<'stepper' | null>('stepper')
+  const [canvasComp] = useState<'stepper' | null>(null)
   const [panelW, setPanelW] = useState(420)
   const [collapsed, setCollapsed] = useState(false)
   const [termSeq, setTermSeq] = useState(0) // bump to kill + respawn the terminal
@@ -100,6 +101,11 @@ export default function CursorClone(): JSX.Element {
           {canvasComp === 'stepper' ? (
             <Stepper />
           ) : (
+            <Canvas theme={theme} />
+          )}
+          {/* welcome screen parked while the canvas is the default editor view —
+              Wade to design the canvas/welcome toggle */}
+          {false && (
             <div className="cc-welcome">
               <img className="cc-logo" src={theme === 'dark' ? cowboyLight : cowboyDark} alt="" />
               <div className="cc-shortcuts">
