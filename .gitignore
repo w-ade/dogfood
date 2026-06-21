@@ -12,6 +12,9 @@ out/
 brainstorming/
 references/
 
+# design sandbox: throwaway render captures
+design/*.png
+
 # vercel
 .vercel
 
