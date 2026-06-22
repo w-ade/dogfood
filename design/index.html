@@ -11,147 +11,123 @@
   <link rel="stylesheet" href="styles.css" />
 
   <!-- Sandbox-only mocks (NOT part of the app). Keeps styles.css a pure mirror.
-       The real editor hosts the Grida canvas; the real panel hosts a live xterm.
-       Here they're faked so the shell renders standalone in a browser. -->
+       Real app: Dials = inline dialkit panel, Terminal = live xterm/pty.
+       Here both are faked so the shell renders standalone in a browser. -->
   <style>
-    /* mock Grida canvas in the editor area */
-    /* "+" crosshair grid (Arc-style), tiled — light gray on white */
-    .cc-canvas-mock {
-      position: relative; width: 100%; height: 100%; display: grid; place-items: center;
-      background-color: #ffffff;
-      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><path d='M20 16.5v7M16.5 20h7' stroke='%23d2d2d8' stroke-width='1'/></svg>");
-      background-size: 40px 40px;
-    }
-    .cc-dark .cc-canvas-mock {
-      background-color: #1c1c1e;
-      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><path d='M20 16.5v7M16.5 20h7' stroke='%23333339' stroke-width='1'/></svg>");
-    }
-    .cc-canvas-mock svg.scene { width: min(62%, 620px); height: auto; }
-    /* mock terminal text */
-    .term-mock { height: 100%; font-family: var(--mono); font-size: 13px; line-height: 1.5; color: var(--fg); white-space: pre-wrap; }
-    .term-mock .cur { display: inline-block; width: 7px; height: 15px; background: #007aff; vertical-align: text-bottom; animation: blink 1.1s steps(1) infinite; }
-    @keyframes blink { 50% { opacity: 0; } }
-    /* mock macOS traffic lights — fills the space the NATIVE controls occupy in the
-       real app. Sandbox-only; do NOT port (the real titlebar reserves 76px for native). */
-    .cc-traffic { position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+    /* mock macOS traffic lights — the real app uses NATIVE controls; do NOT port */
+    .cc-traffic { position: absolute; left: 18px; top: 18px;
       display: flex; align-items: center; gap: 8px; -webkit-app-region: no-drag; }
     .cc-traffic .tl { position: relative; width: 12px; height: 12px; border-radius: 50%;
       box-shadow: inset 0 0 0 0.5px rgba(0,0,0,.18); }
     .cc-traffic .red { background: #ff5f57; }
     .cc-traffic .yellow { background: #febc2e; }
     .cc-traffic .green { background: #28c840; }
-    /* glyphs reveal on hover, like the real ones */
-    .cc-traffic .tl::after { position: absolute; inset: 0; display: grid; place-items: center;
-      font-size: 9px; font-weight: 700; line-height: 1; color: rgba(0,0,0,.5); opacity: 0; transition: opacity .12s; }
-    .cc-traffic:hover .tl::after { opacity: 1; }
-    .cc-traffic .red::after { content: '\00d7'; }      /* × */
-    .cc-traffic .yellow::after { content: '\2212'; }   /* − */
-    .cc-traffic .green::after { content: '\002b'; }    /* + */
-    /* show the real desktop nothing-behind as a soft neutral so the glass reads */
+    /* soft neutral desktop behind the window so the shell reads */
     body { background: #d9d9de; }
+
+    /* mock dialkit panel (real app renders <DialRoot mode="inline" />) */
+    .dials-mock { max-width: 520px; }
+    .dials-mock .dm-title { font-size: 15px; font-weight: 600; color: var(--ink); margin: 2px 2px 12px; }
+    .dials-mock .dm-row {
+      display: grid; grid-template-columns: 80px 1fr 44px; align-items: center;
+      gap: 12px; height: 34px; padding: 0 12px; margin-bottom: 8px;
+      background: var(--fill); border-radius: 8px;
+    }
+    .dials-mock .dm-row .dm-label { font-size: 13px; color: var(--ink-2); }
+    .dials-mock .dm-row .dm-track { position: relative; height: 4px; border-radius: 999px; background: rgba(0,0,0,.12); }
+    .dials-mock .dm-row .dm-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; background: var(--accent); }
+    .dials-mock .dm-row .dm-val { font-size: 13px; color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }
+    .dials-mock .dm-toggle { justify-self: end; display: flex; gap: 0; background: var(--fill-2); border-radius: 7px; padding: 2px; }
+    .dials-mock .dm-toggle span { font-size: 12px; color: var(--ink-2); padding: 3px 10px; border-radius: 5px; }
+    .dials-mock .dm-toggle span.on { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+
+    /* mock terminal text (real app renders <Terminal />) */
+    .term-mock { height: 100%; font-family: var(--mono); font-size: 13px; line-height: 1.5; color: var(--ink); white-space: pre-wrap; }
+    .term-mock .cur { display: inline-block; width: 7px; height: 15px; background: #007aff; vertical-align: text-bottom; animation: blink 1.1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
   </style>
 </head>
 <body>
-  <!-- ===== faithful rebuild of CursorClone.tsx ===== -->
+  <!-- ===== Dogfood shell — full-width stage + bottom dock ===== -->
   <div class="cc cc-light" id="cc">
 
-    <!-- title bar -->
+    <!-- mock macOS traffic lights (sandbox-only) -->
+    <div class="cc-traffic" title="mock window controls">
+      <span class="tl red"></span><span class="tl yellow"></span><span class="tl green"></span>
+    </div>
+
+    <!-- titlebar: breadcrumb -->
     <div class="cc-titlebar">
-      <!-- mock macOS traffic lights (sandbox-only — real app uses NATIVE controls, not ported) -->
-      <div class="cc-traffic" title="mock window controls">
-        <span class="tl red"></span><span class="tl yellow"></span><span class="tl green"></span>
-      </div>
-      <div class="cc-title">Dogfood</div>
-      <div class="cc-titleright">
-        <button class="cc-ic cc-toggle on" id="termToggle" title="Terminal panel">
-          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M15 4v16" stroke="currentColor" stroke-width="1.7"/></svg>
-        </button>
-        <button class="cc-ic cc-gear" id="gear" title="Toggle light / dark">
-          <!-- Moon shown in light mode (click → dark) -->
-          <svg viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
-        </button>
-        <span class="cc-ic" title="Settings">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M3 12 7.5 4.2H16.5L21 12l-4.5 7.8H7.5L3 12Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="1.7"/></svg>
-        </span>
+      <div class="cc-crumb">
+        <span class="c-dim">New project</span>
+        <span class="c-sep">/</span>
+        <span class="c-cur">New</span>
       </div>
     </div>
 
-    <!-- body: canvas + right terminal panel -->
+    <!-- main: full-width stage with the bottom dock -->
     <div class="cc-main">
-      <div class="cc-editor">
-        <div class="cc-canvas-mock">
-          <!-- mock of the live Grida (@grida/svg-editor) canvas content -->
-          <svg class="scene" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-            <rect x="220" y="240" width="260" height="170" rx="16" fill="#a5d8ff" stroke="#1e1e1e" stroke-width="2"/>
-            <circle cx="660" cy="330" r="100" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="2"/>
-            <text x="240" y="520" font-family="-apple-system, Inter, sans-serif" font-size="48" fill="#1e1e1e">Dogfood × Grida</text>
-          </svg>
-        </div>
-      </div>
-
-      <div class="cc-panel" id="panel" style="width: 420px;">
-        <div class="cc-panel-resize" id="resize"></div>
-        <div class="cc-panel-head">
-          <div class="cc-tabs"><span class="cc-tab on">Terminal</span></div>
-          <div class="cc-panel-ctrls">
-            <button class="cc-ic cc-kill" title="Kill terminal">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <button class="cc-ic cc-toggle" id="hide" title="Hide terminal">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
+      <div class="cc-stage">
+        <div class="cc-dock" id="dock" style="height: 300px;">
+          <div class="cc-dock-resize" id="dockResize" title="Drag to resize"></div>
+          <div class="cc-dock-tabs">
+            <span class="dtab on" data-pane="dials">Dials</span>
+            <span class="dtab" data-pane="term">Terminal</span>
+          </div>
+          <div class="cc-dock-body">
+            <!-- Dials pane (mock of inline dialkit) -->
+            <div class="dock-pane dials" data-pane="dials" style="display:block;">
+              <div class="dials-mock">
+                <div class="dm-title">Parameters</div>
+                <div class="dm-row"><span class="dm-label">Gain</span><span class="dm-track"><span class="dm-fill" style="width:40%"></span></span><span class="dm-val">0.8</span></div>
+                <div class="dm-row"><span class="dm-label">Pan</span><span class="dm-track"><span class="dm-fill" style="width:50%"></span></span><span class="dm-val">0.0</span></div>
+                <div class="dm-row"><span class="dm-label">Mix</span><span class="dm-track"><span class="dm-fill" style="width:50%"></span></span><span class="dm-val">50</span></div>
+                <div class="dm-row"><span class="dm-label">Bypass</span><span></span><span class="dm-toggle"><span>Off</span><span class="on">On</span></span></div>
+              </div>
+            </div>
+            <!-- Terminal pane (mock) -->
+            <div class="dock-pane term" data-pane="term" style="display:none;">
+              <div class="term-mock">wade@wades-MBP ~ % claude
+<span style="color:var(--ink-2)">Welcome to Claude Code. Ask me to build a component…</span>
+wade@wades-MBP ~ % <span class="cur"></span></div>
+            </div>
           </div>
         </div>
-        <div class="cc-term">
-          <div class="term-wrap"><div class="term-mock">wade@wades-MBP ~ % claude
-<span style="color:var(--mut)">Welcome to Claude Code. Ask me to build a component…</span>
-wade@wades-MBP ~ % <span class="cur"></span></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- status bar -->
-    <div class="cc-status">
-      <div class="cc-status-right">
-        <span class="cc-ic">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3 8.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 4.5v4h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8v4.2l2.8 1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span>
       </div>
     </div>
   </div>
 
-  <!-- minimal behavior so you design against real states (toggle / collapse / resize) -->
+  <!-- minimal behavior so you design against real states (tab switch · dock resize · theme) -->
   <script>
     const cc = document.getElementById('cc');
-    const gear = document.getElementById('gear');
-    const panel = document.getElementById('panel');
-    const termToggle = document.getElementById('termToggle');
-    const sunSvg = '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
-    const moonSvg = '<svg viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';
 
-    gear.onclick = () => {
-      const dark = cc.classList.toggle('cc-dark');
-      cc.classList.toggle('cc-light', !dark);
-      gear.innerHTML = dark ? sunSvg : moonSvg; // dark shows Sun, light shows Moon (matches app)
-    };
+    // dock tabs
+    document.querySelectorAll('.cc-dock-tabs .dtab').forEach(tab => {
+      tab.onclick = () => {
+        const pane = tab.dataset.pane;
+        document.querySelectorAll('.cc-dock-tabs .dtab').forEach(t => t.classList.toggle('on', t === tab));
+        document.querySelectorAll('.dock-pane').forEach(p => p.style.display = p.dataset.pane === pane ? 'block' : 'none');
+      };
+    });
 
-    const setCollapsed = (c) => {
-      panel.style.display = c ? 'none' : 'flex';
-      termToggle.classList.toggle('on', !c);
-    };
-    termToggle.onclick = () => setCollapsed(panel.style.display !== 'none');
-    document.getElementById('hide').onclick = () => setCollapsed(true);
-
-    // panel resize (mirrors CursorClone: grow as you drag left, clamp 280 … innerWidth-300)
-    const resize = document.getElementById('resize');
-    resize.onmousedown = (e) => {
+    // dock resize (drag top edge up to grow)
+    const dock = document.getElementById('dock');
+    document.getElementById('dockResize').onmousedown = (e) => {
       e.preventDefault();
-      const sx = e.clientX, sw = panel.offsetWidth;
-      document.body.style.cursor = 'ew-resize';
-      const move = (ev) => { panel.style.width = Math.min(Math.max(280, sw + (sx - ev.clientX)), window.innerWidth - 300) + 'px'; };
+      const sy = e.clientY, sh = dock.offsetHeight;
+      document.body.style.cursor = 'ns-resize';
+      const move = (ev) => { dock.style.height = Math.min(Math.max(160, sh + (sy - ev.clientY)), window.innerHeight - 160) + 'px'; };
       const up = () => { document.body.style.cursor = ''; window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
       window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
     };
+
+    // press 'd' to preview dark mode
+    window.addEventListener('keydown', e => {
+      if (e.key === 'd' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'INPUT') {
+        const dark = cc.classList.toggle('cc-dark');
+        cc.classList.toggle('cc-light', !dark);
+      }
+    });
   </script>
 </body>
 </html>

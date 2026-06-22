@@ -11,7 +11,10 @@ export default defineConfig({
   },
   renderer: {
     resolve: {
-      alias: { '@': resolve('src/renderer/src') }
+      alias: { '@': resolve('src/renderer/src') },
+      // dialkit ships its own React; dedupe so hooks run against the app's
+      // single React instance (otherwise: "Invalid hook call").
+      dedupe: ['react', 'react-dom']
     },
     plugins: [react()],
     build: {

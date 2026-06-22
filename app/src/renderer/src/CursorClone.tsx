@@ -1,51 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
+import { DialRoot, useDialKit } from 'dialkit'
 import Terminal from './Terminal'
-import Canvas from './Canvas'
-import Stepper from './Stepper'
-import cowboyDark from './assets/cowboy.svg'
-import cowboyLight from './assets/cowboy-inverse.svg'
 
-// Static recreation of the Cursor / VS Code window (refs in references/),
-// with Cowboy in place of the cube logo. Theme toggles via the gear. Visual only.
-
-const sc = (icon: JSX.Element): JSX.Element => <span className="cc-ic">{icon}</span>
-
-const PanelBottom = <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" strokeWidth="1.7"/><path d="M3 14h18" stroke="currentColor" strokeWidth="1.7"/><rect x="3.5" y="14.5" width="17" height="5" rx="1" fill="currentColor" opacity=".22"/></svg>
-const PanelRight = <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" strokeWidth="1.7"/><path d="M15 4v16" stroke="currentColor" strokeWidth="1.7"/></svg>
-const Gear = <svg viewBox="0 0 24 24" fill="none"><path d="M19.4 13a7.8 7.8 0 0 0 0-2l2-1.5-2-3.4-2.3 1a7.6 7.6 0 0 0-1.7-1l-.3-2.6h-4l-.3 2.6a7.6 7.6 0 0 0-1.7 1l-2.3-1-2 3.4L4.6 11a7.8 7.8 0 0 0 0 2l-2 1.5 2 3.4 2.3-1a7.6 7.6 0 0 0 1.7 1l.3 2.6h4l.3-2.6a7.6 7.6 0 0 0 1.7-1l2.3 1 2-3.4-2-1.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/><circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5"/></svg>
-const Plus = <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
-const ChevDown = <svg viewBox="0 0 24 24" fill="none"><path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-const Split = <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.7"/><path d="M12 4v16" stroke="currentColor" strokeWidth="1.7"/></svg>
-const Trash = <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-const More = <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
-const ChevUp = <svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-const Close = <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
-const ActivityLog = <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3 8.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/><path d="M3 4.5v4h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 8v4.2l2.8 1.6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-const Sun = <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.7"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></svg>
-const Moon = <svg viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/></svg>
-const Bolt = <svg viewBox="0 0 24 24" fill="none"><path d="M3 12 7.5 4.2H16.5L21 12l-4.5 7.8H7.5L3 12Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" strokeWidth="1.7"/></svg>
-
-const shortcuts: [string, string[]][] = [
-  ['Hide Terminal', ['⌘', 'J']],
-  ['Search Files', ['⌘', 'P']],
-  ['Open Browser', ['⇧', '⌘', 'B']]
-]
-
-const tabs = ['Terminal']
+// Dogfood shell — gray window · breadcrumb titlebar · full-width stage with a
+// resizable bottom dock (Dials = inline dialkit panel · Terminal = live pty).
 
 export default function CursorClone(): JSX.Element {
-  const [theme, setTheme] = useState<'light' | 'dark'>(
-    () => (localStorage.getItem('dogfood-theme') as 'light' | 'dark') || 'dark'
-  )
-  const toggle = (): void =>
-    setTheme((t) => {
-      const n = t === 'dark' ? 'light' : 'dark'
-      try { localStorage.setItem('dogfood-theme', n) } catch { /* noop */ }
-      return n
-    })
+  const [theme] = useState<'light' | 'dark'>('light')
+  const [dockTab, setDockTab] = useState<'dials' | 'terminal'>('dials')
 
-  // Drive the macOS window vibrancy tint (and the debug stream) from the UI theme.
-  // Guard against StrictMode's double-invoke so we don't log it twice.
+  // inline dialkit panel — parameters for the active node (placeholder set)
+  useDialKit('Parameters', {
+    gain: [0.8, 0, 2],
+    pan: [0, -1, 1],
+    mix: [50, 0, 100],
+    bypass: false
+  })
+
+  // Drive the macOS window vibrancy tint from the UI theme (guard StrictMode double-invoke).
   const lastTheme = useRef<string | null>(null)
   useEffect(() => {
     if (lastTheme.current === theme) return
@@ -53,28 +25,17 @@ export default function CursorClone(): JSX.Element {
     window.dogfood?.theme?.set?.(theme)
   }, [theme])
 
-  const [canvasComp] = useState<'stepper' | null>(null)
-  const [panelW, setPanelW] = useState(420)
-  const [collapsed, setCollapsed] = useState(false)
-  const [termSeq, setTermSeq] = useState(0) // bump to kill + respawn the terminal
-  const [confirmKill, setConfirmKill] = useState(false)
-  const killTerminal = (): void => {
-    setTermSeq((n) => n + 1)
-    setConfirmKill(false)
-  }
-  const resizing = useRef(false)
-  const startResize = (e: React.MouseEvent): void => {
+  // resizable dock height (drag the top edge up to grow)
+  const [dockH, setDockH] = useState(300)
+  const startDockResize = (e: React.MouseEvent): void => {
     e.preventDefault()
-    resizing.current = true
-    const sx = e.clientX
-    const sw = panelW
-    document.body.style.cursor = 'ew-resize'
+    const sy = e.clientY
+    const sh = dockH
+    document.body.style.cursor = 'ns-resize'
     const onMove = (ev: MouseEvent): void => {
-      if (!resizing.current) return
-      setPanelW(Math.min(Math.max(280, sw + (sx - ev.clientX)), window.innerWidth - 300))
+      setDockH(Math.min(Math.max(160, sh + (sy - ev.clientY)), window.innerHeight - 160))
     }
     const onUp = (): void => {
-      resizing.current = false
       document.body.style.cursor = ''
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
@@ -85,80 +46,34 @@ export default function CursorClone(): JSX.Element {
 
   return (
     <div className={`cc cc-${theme}`}>
-      {/* title bar */}
+      {/* titlebar: breadcrumb (drag region; clears native traffic lights) */}
       <div className="cc-titlebar">
-        <div className="cc-title">Dogfood</div>
-        <div className="cc-titleright">
-          <button className={`cc-ic cc-toggle ${collapsed ? '' : 'on'}`} title="Terminal panel" onClick={() => setCollapsed((c) => !c)}>{PanelRight}</button>
-          <button className="cc-ic cc-gear" title="Toggle light / dark" onClick={toggle}>{theme === 'dark' ? Sun : Moon}</button>
-          <span className="cc-ic" title="Settings">{Bolt}</span>
+        <div className="cc-crumb">
+          <span className="c-dim">New project</span>
+          <span className="c-sep">/</span>
+          <span className="c-cur">New</span>
         </div>
       </div>
 
-      {/* body: canvas + right terminal panel */}
+      {/* main: full-width stage with the bottom dock */}
       <div className="cc-main">
-        <div className="cc-editor">
-          {canvasComp === 'stepper' ? (
-            <Stepper />
-          ) : (
-            <Canvas theme={theme} />
-          )}
-          {/* welcome screen parked while the canvas is the default editor view —
-              Wade to design the canvas/welcome toggle */}
-          {false && (
-            <div className="cc-welcome">
-              <img className="cc-logo" src={theme === 'dark' ? cowboyLight : cowboyDark} alt="" />
-              <div className="cc-shortcuts">
-                {shortcuts.map(([label, keys]) => (
-                  <div className="cc-sc" key={label}>
-                    <span className="cc-sc-label">{label}</span>
-                    <span className="cc-sc-keys">
-                      {keys.map((k, i) => <span className="cc-key" key={i}>{k}</span>)}
-                    </span>
-                  </div>
-                ))}
+        <div className="cc-stage">
+          <div className="cc-dock" style={{ height: dockH }}>
+            <div className="cc-dock-resize" onMouseDown={startDockResize} title="Drag to resize" />
+            <div className="cc-dock-tabs">
+              <span className={`dtab ${dockTab === 'dials' ? 'on' : ''}`} onClick={() => setDockTab('dials')}>Dials</span>
+              <span className={`dtab ${dockTab === 'terminal' ? 'on' : ''}`} onClick={() => setDockTab('terminal')}>Terminal</span>
+            </div>
+            <div className="cc-dock-body">
+              {/* both panes stay mounted so the live terminal session survives a tab switch */}
+              <div className="dock-pane dials" style={{ display: dockTab === 'dials' ? 'block' : 'none' }}>
+                <DialRoot mode="inline" theme={theme} />
+              </div>
+              <div className="dock-pane term" style={{ display: dockTab === 'terminal' ? 'block' : 'none' }}>
+                <Terminal id="main" theme={theme} />
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Panel stays mounted when hidden so the live terminal session survives a toggle. */}
-        <div className="cc-panel" style={{ width: panelW, display: collapsed ? 'none' : 'flex' }}>
-          <div className="cc-panel-resize" onMouseDown={startResize} />
-          <div className="cc-panel-head">
-            <div className="cc-tabs">
-              {tabs.map((t) => (
-                <span key={t} className={`cc-tab ${t === 'Terminal' ? 'on' : ''}`}>{t}</span>
-              ))}
-            </div>
-            <div className="cc-panel-ctrls">
-              <button className="cc-ic cc-kill" title="Kill terminal" onClick={() => setConfirmKill(true)}>{Trash}</button>
-              <button className="cc-ic cc-toggle" title="Hide terminal" onClick={() => setCollapsed(true)}>{ChevDown}</button>
-            </div>
           </div>
-          <div className="cc-term">
-            <Terminal key={termSeq} id="main" theme={theme} />
-          </div>
-
-          {confirmKill && (
-            <div className="cc-confirm-scrim" onMouseDown={() => setConfirmKill(false)}>
-              <div className="cc-confirm" onMouseDown={(e) => e.stopPropagation()}>
-                <div className="cc-confirm-title">Kill terminal?</div>
-                <div className="cc-confirm-sub">Are you sure you want to kill the current terminal? The running session will be ended and a fresh one started.</div>
-                <div className="cc-confirm-row">
-                  <button className="cc-btn" onClick={() => setConfirmKill(false)}>Cancel</button>
-                  <button className="cc-btn danger" onClick={killTerminal}>Kill terminal</button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* status bar */}
-      <div className="cc-status">
-        <div className="cc-status-right">
-          {sc(ActivityLog)}
         </div>
       </div>
     </div>
