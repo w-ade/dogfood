@@ -97,23 +97,26 @@ body {
 .cc-crumb .c-sep { color: var(--ink-3); }
 .cc-crumb .c-cur { color: var(--ink); }
 
-/* ---- main (full-width stage) ------------------------------- */
+/* ---- main (stage + right-side dock) ------------------------ */
 .cc-main {
   flex: 1 1 auto; min-height: 0;
   display: flex;
-  padding: 0 14px 14px 14px;   /* symmetric gutter around the stage */
+  gap: 14px;
+  padding: 0 14px 14px 14px;   /* symmetric gutter around the stage + dock */
 }
 
 /* ---- stage (the empty canvas) ------------------------------ */
 .cc-stage {
-  position: relative;
   flex: 1 1 auto; min-width: 0;
 }
 
-/* bottom dock — floating card with tabs (Dials · Terminal) */
+/* right-side vertical dock — floating card with tabs (Dials · Terminal) */
 .cc-dock {
-  position: absolute; left: 0; right: 0; bottom: 0;
-  display: flex; flex-direction: column;
+  position: relative;
+  flex: 0 0 auto;
+  align-self: stretch;
+  margin-top: 14px;
+  display: flex; flex-direction: column; min-height: 0;
   background: var(--panel);
   border: 1px solid var(--line-2);
   border-radius: var(--r-panel);
@@ -122,8 +125,8 @@ body {
   -webkit-app-region: no-drag;
 }
 .cc-dock-resize {
-  position: absolute; top: 0; left: 0; right: 0; height: 8px;
-  cursor: ns-resize; z-index: 5;
+  position: absolute; left: 0; top: 0; bottom: 0; width: 8px;
+  cursor: ew-resize; z-index: 5;
 }
 .cc-dock-tabs {
   flex: 0 0 auto;

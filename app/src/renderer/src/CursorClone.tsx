@@ -25,15 +25,15 @@ export default function CursorClone(): JSX.Element {
     window.dogfood?.theme?.set?.(theme)
   }, [theme])
 
-  // resizable dock height (drag the top edge up to grow)
-  const [dockH, setDockH] = useState(300)
+  // resizable dock width (drag the left edge to grow)
+  const [dockW, setDockW] = useState(420)
   const startDockResize = (e: React.MouseEvent): void => {
     e.preventDefault()
-    const sy = e.clientY
-    const sh = dockH
-    document.body.style.cursor = 'ns-resize'
+    const sx = e.clientX
+    const sw = dockW
+    document.body.style.cursor = 'ew-resize'
     const onMove = (ev: MouseEvent): void => {
-      setDockH(Math.min(Math.max(160, sh + (sy - ev.clientY)), window.innerHeight - 160))
+      setDockW(Math.min(Math.max(280, sw + (sx - ev.clientX)), window.innerWidth - 240))
     }
     const onUp = (): void => {
       document.body.style.cursor = ''
@@ -55,23 +55,22 @@ export default function CursorClone(): JSX.Element {
         </div>
       </div>
 
-      {/* main: full-width stage with the bottom dock */}
+      {/* main: stage + right-side vertical dock */}
       <div className="cc-main">
-        <div className="cc-stage">
-          <div className="cc-dock" style={{ height: dockH }}>
-            <div className="cc-dock-resize" onMouseDown={startDockResize} title="Drag to resize" />
-            <div className="cc-dock-tabs">
-              <span className={`dtab ${dockTab === 'dials' ? 'on' : ''}`} onClick={() => setDockTab('dials')}>Dials</span>
-              <span className={`dtab ${dockTab === 'terminal' ? 'on' : ''}`} onClick={() => setDockTab('terminal')}>Terminal</span>
+        <div className="cc-stage" />
+        <div className="cc-dock" style={{ width: dockW }}>
+          <div className="cc-dock-resize" onMouseDown={startDockResize} title="Drag to resize" />
+          <div className="cc-dock-tabs">
+            <span className={`dtab ${dockTab === 'dials' ? 'on' : ''}`} onClick={() => setDockTab('dials')}>Dials</span>
+            <span className={`dtab ${dockTab === 'terminal' ? 'on' : ''}`} onClick={() => setDockTab('terminal')}>Terminal</span>
+          </div>
+          <div className="cc-dock-body">
+            {/* both panes stay mounted so the live terminal session survives a tab switch */}
+            <div className="dock-pane dials" style={{ display: dockTab === 'dials' ? 'block' : 'none' }}>
+              <DialRoot mode="inline" theme={theme} />
             </div>
-            <div className="cc-dock-body">
-              {/* both panes stay mounted so the live terminal session survives a tab switch */}
-              <div className="dock-pane dials" style={{ display: dockTab === 'dials' ? 'block' : 'none' }}>
-                <DialRoot mode="inline" theme={theme} />
-              </div>
-              <div className="dock-pane term" style={{ display: dockTab === 'terminal' ? 'block' : 'none' }}>
-                <Terminal id="main" theme={theme} />
-              </div>
+            <div className="dock-pane term" style={{ display: dockTab === 'terminal' ? 'block' : 'none' }}>
+              <Terminal id="main" theme={theme} />
             </div>
           </div>
         </div>

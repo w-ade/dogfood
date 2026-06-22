@@ -65,10 +65,10 @@
       </div>
     </div>
 
-    <!-- main: full-width stage with the bottom dock -->
+    <!-- main: stage + right-side vertical dock -->
     <div class="cc-main">
-      <div class="cc-stage">
-        <div class="cc-dock" id="dock" style="height: 300px;">
+      <div class="cc-stage"></div>
+      <div class="cc-dock" id="dock" style="width: 420px;">
           <div class="cc-dock-resize" id="dockResize" title="Drag to resize"></div>
           <div class="cc-dock-tabs">
             <span class="dtab on" data-pane="dials">Dials</span>
@@ -95,7 +95,6 @@ wade@wades-MBP ~ % <span class="cur"></span></div>
         </div>
       </div>
     </div>
-  </div>
 
   <!-- minimal behavior so you design against real states (tab switch · dock resize · theme) -->
   <script>
@@ -110,13 +109,13 @@ wade@wades-MBP ~ % <span class="cur"></span></div>
       };
     });
 
-    // dock resize (drag top edge up to grow)
+    // dock resize (drag left edge to grow)
     const dock = document.getElementById('dock');
     document.getElementById('dockResize').onmousedown = (e) => {
       e.preventDefault();
-      const sy = e.clientY, sh = dock.offsetHeight;
-      document.body.style.cursor = 'ns-resize';
-      const move = (ev) => { dock.style.height = Math.min(Math.max(160, sh + (sy - ev.clientY)), window.innerHeight - 160) + 'px'; };
+      const sx = e.clientX, sw = dock.offsetWidth;
+      document.body.style.cursor = 'ew-resize';
+      const move = (ev) => { dock.style.width = Math.min(Math.max(280, sw + (sx - ev.clientX)), window.innerWidth - 240) + 'px'; };
       const up = () => { document.body.style.cursor = ''; window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
       window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
     };
