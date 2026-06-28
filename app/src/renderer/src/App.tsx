@@ -1,5 +1,5 @@
-import CursorClone from './CursorClone'
+import Shell from './Shell'
 
 export default function App(): JSX.Element {
-  return <CursorClone />
+  return <Shell />
 }

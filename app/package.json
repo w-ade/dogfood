@@ -6,6 +6,7 @@
   "author": "wade",
   "scripts": {
     "dev": "electron-vite dev",
+    "design": "vite --config vite.renderer.config.ts",
     "build": "electron-vite build",
     "start": "electron-vite preview",
     "postinstall": "chmod +x node_modules/node-pty/prebuilds/darwin-*/spawn-helper 2>/dev/null || true"
